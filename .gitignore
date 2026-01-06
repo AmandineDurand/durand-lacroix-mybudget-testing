@@ -9,6 +9,11 @@ pgadmin_data/
 .DS_Store
 
 __pycache__/
+./pytest_cache/
 .venv
 
+.coverage
+
 .cache/
+./benchmarks/
+
