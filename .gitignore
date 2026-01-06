@@ -1,0 +1,15 @@
+.env
+
+postgres_data/
+pgadmin_data/
+
+.vscode/
+.idea/
+*~
+.DS_Store
+
+__pycache__/
+*.py
+.venv
+
+.cache/
