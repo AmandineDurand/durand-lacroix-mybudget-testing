@@ -28,7 +28,7 @@ services:
 
   # API
   api:
-    build: .
+    build: ./backend
     container_name: budget_api
     restart: unless-stopped
     ports:
@@ -44,7 +44,7 @@ services:
     networks:
       - budget_network
     volumes:
-      - ./:/app
+      - ./backend:/app
 
 volumes:
   postgres_data:
