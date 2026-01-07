@@ -20,10 +20,10 @@ Afin de **consulter uniquement les transactions d'une catégorie spécifique**.
 - **Étant donné que** l'API contient les transactions suivantes
 ```
   | id | montant | libellé    | type     | catégorie    | date       |
-  | 1  | 45.50   | Courses    | dépense  | alimentation | 2026-01-06 |
-  | 2  | 2500.00 | Salaire    | revenu   | salaire      | 2026-01-05 |
-  | 3  | 800.00  | Loyer      | dépense  | logement     | 2026-01-01 |
-  | 4  | 30.00   | Restaurant | dépense  | alimentation | 2026-01-03 |
+  | 1  | 45.50   | Courses    | DEPENSE  | alimentation | 2026-01-06 |
+  | 2  | 2500.00 | Salaire    | REVENU   | salaire      | 2026-01-05 |
+  | 3  | 800.00  | Loyer      | DEPENSE  | logement     | 2026-01-01 |
+  | 4  | 30.00   | Restaurant | DEPENSE  | alimentation | 2026-01-03 |
 ```
 - **Quand** je fais une requête GET sur `/api/transactions?categorie=alimentation` OU `/api/transactions?categorie=ALIMENTATION` (insensible à la casse des majuscules)
 - **Alors** le code de réponse doit être 200
@@ -35,7 +35,7 @@ Afin de **consulter uniquement les transactions d'une catégorie spécifique**.
 - **Étant donné que** l'API contient les transactions suivantes
 ```
   | id | montant | libellé  | type     | catégorie    | date       |
-  | 1  | 45.50   | Courses  | dépense  | alimentation | 2026-01-06 |
+  | 1  | 45.50   | Courses  | DEPENSE  | alimentation | 2026-01-06 |
 ```
 - **Quand** je fais une requête GET sur `/api/transactions?categorie=transport`
 - **Alors** le code de réponse doit être 200
@@ -46,10 +46,10 @@ Afin de **consulter uniquement les transactions d'une catégorie spécifique**.
 - **Étant donné que** l'API contient les transactions suivantes
 ```
   | id | montant | libellé    | type     | catégorie    | date       |
-  | 1  | 45.50   | Courses    | dépense  | alimentation | 2026-01-06 |
-  | 2  | 2500.00 | Salaire    | revenu   | salaire      | 2026-01-05 |
-  | 3  | 30.00   | Restaurant | dépense  | alimentation | 2026-01-03 |
-  | 4  | 20.00   | Snack      | dépense  | alimentation | 2025-12-28 |
+  | 1  | 45.50   | Courses    | DEPENSE  | alimentation | 2026-01-06 |
+  | 2  | 2500.00 | Salaire    | REVENU   | salaire      | 2026-01-05 |
+  | 3  | 30.00   | Restaurant | DEPENSE  | alimentation | 2026-01-03 |
+  | 4  | 20.00   | Snack      | DEPENSE  | alimentation | 2025-12-28 |
 ```
 - **Quand** je fais une requête GET sur `/api/transactions?categorie=alimentation&date_debut=2026-01-01`
 - **Alors** le code de réponse doit être 200
