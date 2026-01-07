@@ -79,6 +79,9 @@ INSERT INTO categorie (nom, description, icone) VALUES
     ('Factures', 'Électricité, internet, téléphone', '📱'),
     ('Autres', 'Dépenses diverses non catégorisées', '📦');
 
+INSERT INTO utilisateur (email, mot_de_passe, nom, prenom, date_creation) VALUES 
+    ('test@budget.com', 'test_password_hash', 'Test', 'User', CURRENT_TIMESTAMP);
+
 -- Commentaires sur les tables et colonnes
 COMMENT ON TABLE utilisateur IS 'Utilisateurs de l''application de gestion de budget';
 COMMENT ON TABLE categorie IS 'Catégories prédéfinies pour classifier les transactions';

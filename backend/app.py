@@ -27,3 +27,24 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Import du router APRÈS la définition de Base et get_db
+from scripts.saisie_transaction import router as transaction_router, Transaction, Categorie
+
+# Création des tables
+Base.metadata.create_all(bind=engine)
+
+# Inclusion du router
+app.include_router(transaction_router)
+
+# Route de base pour vérifier que l'API fonctionne
+@app.get("/")
+def root():
+    return {
+        "message": "API Budget Personnel",
+        "version": "1.0.0",
+        "endpoints": {
+            "transactions": "/api/transactions",
+            "docs": "/docs"
+        }
+    }
