@@ -1,7 +1,9 @@
 # US1 : Liste des transactions
 
 En tant qu'**utilisateur de l'API**,
+
 Je veux **lister toutes mes transactions via une route API**,
+
 Afin de **consulter l'historique de mes opérations financières**.
 
 ## Critères d'acceptation :
