@@ -1,7 +1,9 @@
 # US1 : Ajouter une transaction
 
 En tant qu'**utilisateur de l'API**,
+
 Je veux **ajouter une transaction via une route API**,
+
 Afin d'**enregistrer mes revenus et dépenses dans le système**.
 
 ## Critères d'acceptation :

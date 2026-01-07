@@ -1,7 +1,9 @@
 # US1 : Filtrage des transactions par catégorie
 
 En tant qu'**utilisateur de l'API**,
+
 Je veux **filtrer les transactions par catégorie via une route API**,
+
 Afin de **consulter uniquement les transactions d'une catégorie spécifique**.
 
 ## Critères d'acceptation :
