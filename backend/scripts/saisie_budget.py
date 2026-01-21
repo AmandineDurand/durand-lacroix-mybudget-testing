@@ -8,6 +8,10 @@ class BudgetService:
         self.db = db
 
     def add_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date) -> Budget:
+
+        if date_fin < date_debut:
+            raise ValueError("La date de fin doit être postérieure à la date de début")
+
         nouveau_budget = Budget(
             categorie_id=categorie_id,
             montant=montant,
