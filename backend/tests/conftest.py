@@ -1,4 +1,3 @@
-# conftest.py
 import sys
 import os
 import pytest
@@ -93,6 +92,13 @@ def mock_db_session():
     session.refresh.return_value = None
     session.rollback.return_value = None
     
+    def side_effect_refresh(instance):
+            if hasattr(instance, 'id') and instance.id is None:
+                instance.id = 1 
+            return None
+
+    session.refresh.side_effect = side_effect_refresh
+
     return session
 
 @pytest.fixture
