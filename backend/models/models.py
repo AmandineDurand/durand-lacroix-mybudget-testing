@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from database import Base
 import enum
@@ -37,3 +37,13 @@ class Transaction(Base):
     @property
     def categorie(self):
         return self.categorie_obj.nom if self.categorie_obj else None
+
+class Budget(Base):
+    __tablename__ = "budgets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    montant = Column(Float, nullable=False)
+    date_debut = Column(Date, nullable=False)
+    date_fin = Column(Date, nullable=False)
+    
+    categorie_id = Column(Integer, ForeignKey('categorie.id'), nullable=False)
