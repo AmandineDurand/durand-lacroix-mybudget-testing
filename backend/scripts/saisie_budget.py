@@ -18,27 +18,18 @@ class BudgetService:
         categorie = self.db.query(Categorie).filter(Categorie.id == categorie_id).first()
         if not categorie:
             raise ValueError(f"La catégorie avec l'ID {categorie_id} n'existe pas")
-
-        budget_existant = self.db.query(Budget).filter(
+        
+        budget_conflit = self.db.query(Budget).filter( #couvre unicité et chevauchement
             Budget.categorie_id == categorie_id,
-            Budget.date_debut == date_debut,
-            Budget.date_fin == date_fin
+            Budget.date_debut <= date_fin,
+            Budget.date_fin >= date_debut
         ).first()
 
-        if budget_existant:
-            raise ValueError("Un budget existe déjà pour cette catégorie et ces dates exactes")
-        
-        budget_chevauché = self.db.query(Budget).filter(
-            Budget.categorie_id == categorie_id,
-            Budget.date_debut < date_fin,
-            Budget.date_fin > date_debut
-        ).first()
-
-        if budget_existant:
-            raise ValueError("Un budget existe déjà pour cette catégorie et ces dates exactes")
-        
-        if budget_chevauché:
-            raise ValueError("Un budget existe déjà sur cette période (chevauchement)")
+        if budget_conflit:
+            if budget_conflit.date_debut == date_debut and budget_conflit.date_fin == date_fin: #type: ignore
+                 raise ValueError("Un budget existe déjà pour cette catégorie et ces dates exactes")
+            
+            raise ValueError(f"Un budget existe déjà sur cette période (chevauchement avec {budget_conflit.date_debut} - {budget_conflit.date_fin})")
 
         nouveau_budget = Budget(
             categorie_id=categorie_id,

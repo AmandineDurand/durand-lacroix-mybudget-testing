@@ -90,13 +90,15 @@ def test_definir_budget_doublon(mock_db_session, mock_categorie):
     debut = date(2026, 1, 1)
     fin = date(2026, 1, 31)
 
-    # Configure query() to return a category first, then simulate an existing budget
     def fake_query_dup(model):
         q = MagicMock()
         if model is Categorie:
             q.filter.return_value.first.return_value = mock_categorie
         else:
-            q.filter.return_value.first.return_value = MagicMock()
+            existing_budget = MagicMock()
+            existing_budget.date_debut = debut
+            existing_budget.date_fin = fin
+            q.filter.return_value.first.return_value = existing_budget
         return q
 
     mock_db_session.query.side_effect = fake_query_dup
@@ -110,16 +112,23 @@ def test_definir_budget_chevauchement(mock_db_session, mock_categorie):
     """Vérifie qu'on ne peut pas créer un budget qui chevauche une période existante."""
     service = BudgetService(mock_db_session)
     
-    debut_demande = date(2026, 1, 10)
-    fin_demande = date(2026, 1, 20)
+    debut = date(2026, 1, 10)
+    fin= date(2026, 1, 20)
 
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
-        mock_categorie,
-        None,
-        MagicMock()
-    ]
+    def fake_query_dup(model):
+        q = MagicMock()
+        if model is Categorie:
+            q.filter.return_value.first.return_value = mock_categorie
+        else:
+            existing_budget = MagicMock()
+            existing_budget.date_debut = date(2026, 1, 15)
+            existing_budget.date_fin = date(2026, 1, 25)
+            q.filter.return_value.first.return_value = existing_budget
+        return q
+
+    mock_db_session.query.side_effect = fake_query_dup
 
     with pytest.raises(ValueError) as excinfo:
-        service.add_budget(1, 500.0, debut_demande, fin_demande)
+        service.add_budget(1, 500.0, debut, fin)
     
-    assert "Un budget existe déjà sur cette période (chevauchement)" in str(excinfo.value)
+    assert "Un budget existe déjà sur cette période (chevauchement avec 2026-01-15 - 2026-01-25)" in str(excinfo.value)
