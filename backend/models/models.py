@@ -3,6 +3,9 @@ from sqlalchemy.orm import relationship
 from database import Base
 import enum
 
+# Erreur métier :
+class BudgetAlreadyExistsError(Exception):
+    pass
 
 # type de transaction
 class TypeTransaction(str, enum.Enum):

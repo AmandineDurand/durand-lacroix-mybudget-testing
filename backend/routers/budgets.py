@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from scripts.saisie_budget import BudgetService 
 from schemas.budget import BudgetCreate, BudgetRead
+from models.models import BudgetAlreadyExistsError
 
 router = APIRouter(
     prefix="/api/budgets",
@@ -24,3 +25,5 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
         return nouveau_budget
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except BudgetAlreadyExistsError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
