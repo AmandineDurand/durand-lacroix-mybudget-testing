@@ -1,43 +1,18 @@
-import os
 from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from routers import transactions, categories
 
-# Récupération de l'URL de la base de données depuis les variables d'environnement
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-# Configuration SQLAlchemy
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
-
-# Initialisation de l'application FastAPI
+# Init
 app = FastAPI(
     title="Budget Personnel API",
     description="API de gestion de budget",
     version="1.0.0"
 )
 
-# Dépendance pour récupérer la session de base de données
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Inclusion des routeurs
+app.include_router(transactions.router)
+app.include_router(categories.router)
 
-# Import du router APRÈS la définition de Base et get_db
-from scripts.saisie_transaction import router as transaction_router, Transaction, Categorie
-
-# Création des tables
-Base.metadata.create_all(bind=engine)
-
-# Inclusion du router
-app.include_router(transaction_router)
-
-# Route de base pour vérifier que l'API fonctionne
+# Route de base
 @app.get("/")
 def root():
     return {
@@ -45,6 +20,7 @@ def root():
         "version": "1.0.0",
         "endpoints": {
             "transactions": "/api/transactions",
+            "categories": "/api/categories",
             "docs": "/docs"
         }
     }
