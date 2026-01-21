@@ -1,7 +1,7 @@
 # scripts/budget_service.py
 from datetime import date
 from sqlalchemy.orm import Session
-from models.models import Budget
+from models.models import Budget, Categorie
 
 class BudgetService:
     def __init__(self, db: Session):
@@ -14,6 +14,10 @@ class BudgetService:
 
         if montant <= 0 :
             raise ValueError("Le montant doit être strictement positif")
+        
+        categorie = self.db.query(Categorie).filter(Categorie.id == categorie_id).first()
+        if not categorie:
+            raise ValueError(f"La catégorie avec l'ID {categorie_id} n'existe pas")
 
         nouveau_budget = Budget(
             categorie_id=categorie_id,
@@ -22,7 +26,6 @@ class BudgetService:
             date_fin=date_fin
         )
         
-        # Interaction DB standard
         self.db.add(nouveau_budget)
         self.db.commit()
         self.db.refresh(nouveau_budget)
