@@ -2,13 +2,13 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from models.models import Transaction, Categorie
-from schemas.transaction import TransactionBase
+from schemas.transaction import TransactionCreate
 
 class TransactionService:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_transaction(self, transaction_data: TransactionBase) -> Transaction:
+    def create_transaction(self, transaction_data: TransactionCreate) -> Transaction:
         # recherche de la catégorie d'abord
         categorie = self.db.query(Categorie).filter(
             Categorie.nom.ilike(transaction_data.categorie)

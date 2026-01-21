@@ -24,6 +24,8 @@ class TransactionBase(BaseModel):
             raise ValueError("Le type doit être 'REVENU' ou 'DEPENSE'")
         return v_upper
 
+class TransactionCreate(TransactionBase):
+    pass
 
 # Schéma pour la LECTURE (get)
 class TransactionRead(TransactionBase):

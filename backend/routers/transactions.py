@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from schemas.transaction import TransactionBase, TransactionRead
+from schemas.transaction import TransactionCreate, TransactionRead
 from scripts.saisie_transaction import TransactionService
 
 router = APIRouter(
@@ -16,7 +16,7 @@ def get_transaction_service(db: Session = Depends(get_db)) -> TransactionService
 
 @router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
 def create_transaction(
-    transaction_data: TransactionBase,
+    transaction_data: TransactionCreate,
     service: TransactionService = Depends(get_transaction_service)
 ):
     try:
