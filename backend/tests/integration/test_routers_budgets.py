@@ -27,25 +27,6 @@ def test_create_budget_endpoint_success(client, mock_db_session, mock_categorie)
     assert data["montant"] == 500.0
     assert "id" in data
 
-def test_create_budget_endpoint_dates_invalid(client, mock_db_session, mock_categorie):
-    """Teste que le service levant une ValueError renvoie une 400."""
-    payload = {"categorie_id": 1, "montant": 500.0, "date_debut": "2026-01-31", "date_fin": "2026-01-01"}
-    
-    def fake_query(model):
-        q = MagicMock()
-        if model is Categorie:
-            q.filter.return_value.first.return_value = mock_categorie
-        else:
-            q.filter.return_value.first.return_value = None
-        return q
-
-    mock_db_session.query.side_effect = fake_query
-
-    response = client.post("/api/budgets/", json=payload)
-
-    assert response.status_code == 400
-    assert "La date de fin doit être postérieure à la date de début" in response.json()["detail"]
-
 def test_create_budget_endpoint_categorie_invalid(client, mock_db_session):
     """Teste que la création d'un budget avec une catégorie inexistante renvoie une 400."""
     payload = {"categorie_id": 1, "montant": 500.0, "date_debut": "2026-01-01", "date_fin": "2026-01-31"}
@@ -56,25 +37,6 @@ def test_create_budget_endpoint_categorie_invalid(client, mock_db_session):
 
     assert response.status_code == 400
     assert "n'existe pas" in response.json()["detail"]
-
-def test_create_budget_endpoint_montant_invalid(client, mock_db_session, mock_categorie):
-    """Teste que la création d'un budget avec un montant non positif renvoie une 400."""
-    payload = {"categorie_id": 1, "montant": -100.0, "date_debut": "2026-01-01", "date_fin": "2026-01-31"}
-
-    def fake_query(model):
-        q = MagicMock()
-        if model is Categorie:
-            q.filter.return_value.first.return_value = mock_categorie
-        else:
-            q.filter.return_value.first.return_value = None
-        return q
-
-    mock_db_session.query.side_effect = fake_query
-
-    response = client.post("/api/budgets/", json=payload)
-
-    assert response.status_code == 400
-    assert "strictement positif" in response.json()["detail"]
 
 def test_create_budget_endpoint_conflict(client, mock_db_session, mock_categorie):
     """Teste que le service levant une BudgetConflictError renvoie une 409."""
@@ -122,3 +84,41 @@ def test_create_budget_endpoint_internal_other_error(client, mock_db_session, mo
 
     assert response.status_code == 500
     assert response.json()["detail"] == "Internal Server Error"
+
+def test_create_budget_endpoint_dates_invalid(client, mock_db_session, mock_categorie):
+    """Teste que le service levant une ValueError renvoie une 400."""
+    payload = {"categorie_id": 1, "montant": 500.0, "date_debut": "2026-01-31", "date_fin": "2026-01-01"}
+    
+    def fake_query(model):
+        q = MagicMock()
+        if model is Categorie:
+            q.filter.return_value.first.return_value = mock_categorie
+        else:
+            q.filter.return_value.first.return_value = None
+        return q
+
+    mock_db_session.query.side_effect = fake_query
+
+    response = client.post("/api/budgets/", json=payload)
+
+    assert response.status_code == 422
+    assert "La date de fin doit être postérieure à la date de début" in response.json()["detail"]
+
+def test_create_budget_endpoint_montant_invalid(client, mock_db_session, mock_categorie):
+    """Teste que la création d'un budget avec un montant non positif renvoie une 400."""
+    payload = {"categorie_id": 1, "montant": -100.0, "date_debut": "2026-01-01", "date_fin": "2026-01-31"}
+
+    def fake_query(model):
+        q = MagicMock()
+        if model is Categorie:
+            q.filter.return_value.first.return_value = mock_categorie
+        else:
+            q.filter.return_value.first.return_value = None
+        return q
+
+    mock_db_session.query.side_effect = fake_query
+
+    response = client.post("/api/budgets/", json=payload)
+
+    assert response.status_code == 422
+    assert "strictement positif" in response.json()["detail"]
