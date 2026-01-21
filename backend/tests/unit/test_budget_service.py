@@ -73,3 +73,16 @@ def test_definir_budget_categorie_inexistante(mock_db_session):
         service.add_budget(999, 500.0, debut, fin) # ID 999 inexistant
 
     assert "La catégorie avec l'ID 999 n'existe pas" in str(excinfo.value)
+
+def test_definir_budget_doublon(mock_db_session, mock_categorie):
+    """Vérifie qu'on ne peut pas créer deux fois exactement le même budget."""
+    service = BudgetService(mock_db_session)
+    debut = date(2026, 1, 1)
+    fin = date(2026, 1, 31)
+
+    mock_db_session.query.return_value.filter.return_value.first.side_effect = [mock_categorie, MagicMock()]
+
+    with pytest.raises(ValueError) as excinfo:
+        service.add_budget(1, 500.0, debut, fin)
+    
+    assert "Un budget existe déjà pour cette catégorie et ces dates exactes" in str(excinfo.value)
