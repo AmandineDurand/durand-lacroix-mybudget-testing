@@ -40,7 +40,7 @@ def test_get_budget_status_nominal(mock_db_session):
         if model == Budget:
             query_mock.filter.return_value.first.return_value = mock_budget
         elif model == Transaction:
-            query_mock.filter.return_value.filter.return_value.filter.return_value.all.return_value = [t1, t2]
+            query_mock.filter.return_value.all.return_value = [t1, t2]
         return query_mock
     
     mock_db_session.query.side_effect = query_side_effect
@@ -48,7 +48,7 @@ def test_get_budget_status_nominal(mock_db_session):
     resultat = service.get_budget_status(budget_id_test)
 
     assert isinstance(resultat, BudgetStatus)
-    assert resultat.budget_id == 1
+    assert resultat.id == 1
     assert resultat.montant_fixe == 100.0
     assert resultat.montant_depense == 50.0  # 20 + 30
     assert resultat.montant_restant == 50.0  # 100 - 50

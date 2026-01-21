@@ -22,3 +22,9 @@ class BudgetRead(BudgetBase):
 
     class Config:
         from_attributes = True
+
+class BudgetStatus(BudgetRead):
+    montant_depense: float
+    montant_restant: float
+    pourcentage_consomme: float
+    est_depasse: bool
