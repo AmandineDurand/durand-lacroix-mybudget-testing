@@ -3,7 +3,7 @@ import pytest
 from datetime import date
 from unittest.mock import MagicMock
 from scripts.saisie_budget import BudgetService
-from models.models import Budget
+from models.models import Budget, Categorie
 
 def test_definir_budget_valid(mock_db_session):
     """
@@ -59,3 +59,17 @@ def test_definir_budget_montant_invalide(mock_db_session):
     with pytest.raises(ValueError) as excinfo:
         service.add_budget(1, -50.0, debut, fin)
     assert "Le montant doit être strictement positif" in str(excinfo.value)
+
+def test_definir_budget_categorie_inexistante(mock_db_session):
+    """Vérifie que l'on ne peut pas créer un budget pour une catégorie inconnue."""
+    service = BudgetService(mock_db_session)
+    debut = date(2026, 1, 1)
+    fin = date(2026, 1, 31)
+    
+    # configuration du mock : la requête pour la catégorie renvoie None
+    mock_db_session.query.return_value.filter.return_value.first.return_value = None
+
+    with pytest.raises(ValueError) as excinfo:
+        service.add_budget(999, 500.0, debut, fin) # ID 999 inexistant
+
+    assert "La catégorie avec l'ID 999 n'existe pas" in str(excinfo.value)
