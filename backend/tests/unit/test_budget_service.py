@@ -43,3 +43,19 @@ def test_definir_budget_dates_invalides(mock_db_session):
         service.add_budget(1, 100.0, debut, fin)
     
     assert "La date de fin doit être postérieure" in str(excinfo.value)
+
+def test_definir_budget_montant_invalide(mock_db_session):
+    """Vérifie que le montant doit être strictement positif."""
+    service = BudgetService(mock_db_session)
+    debut = date(2026, 1, 1)
+    fin = date(2026, 1, 31)
+
+    # Cas montant = 0
+    with pytest.raises(ValueError) as excinfo:
+        service.add_budget(1, 0, debut, fin)
+    assert "Le montant doit être strictement positif" in str(excinfo.value)
+
+    # Cas montant négatif
+    with pytest.raises(ValueError) as excinfo:
+        service.add_budget(1, -50.0, debut, fin)
+    assert "Le montant doit être strictement positif" in str(excinfo.value)
