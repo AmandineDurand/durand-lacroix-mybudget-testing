@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from scripts.saisie_budget import BudgetService
 from models.models import Budget, Categorie
 
-def test_definir_budget_valid(mock_db_session):
+def test_definir_budget_valid(mock_db_session, mock_categorie):
     """
     Teste la création réussie d'un budget pour une catégorie et une période données.
     """
@@ -14,6 +14,17 @@ def test_definir_budget_valid(mock_db_session):
     montant = 500.0
     debut = date(2026, 1, 1)
     fin = date(2026, 1, 31)
+    
+    # Configure query() to return category for Categorie queries and no existing budget
+    def fake_query_valid(model):
+        q = MagicMock()
+        if model is Categorie:
+            q.filter.return_value.first.return_value = mock_categorie
+        else:
+            q.filter.return_value.first.return_value = None
+        return q
+
+    mock_db_session.query.side_effect = fake_query_valid
 
     nouveau_budget = service.add_budget(categorie_id, montant, debut, fin)
 
@@ -80,7 +91,16 @@ def test_definir_budget_doublon(mock_db_session, mock_categorie):
     debut = date(2026, 1, 1)
     fin = date(2026, 1, 31)
 
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [mock_categorie, MagicMock()]
+    # Configure query() to return a category first, then simulate an existing budget
+    def fake_query_dup(model):
+        q = MagicMock()
+        if model is Categorie:
+            q.filter.return_value.first.return_value = mock_categorie
+        else:
+            q.filter.return_value.first.return_value = MagicMock()
+        return q
+
+    mock_db_session.query.side_effect = fake_query_dup
 
     with pytest.raises(ValueError) as excinfo:
         service.add_budget(1, 500.0, debut, fin)
