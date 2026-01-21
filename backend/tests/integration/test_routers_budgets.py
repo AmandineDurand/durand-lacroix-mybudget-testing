@@ -98,3 +98,27 @@ def test_create_budget_endpoint_conflict(client, mock_db_session, mock_categorie
     
     assert response.status_code == 409
     assert "Un budget existe déjà" in response.json()["detail"]
+
+def test_create_budget_endpoint_internal_other_error(client, mock_db_session, mock_categorie):
+    """
+    Teste qu'une exception imprévue (non gérée par le try/except) renvoie une 500.
+    """
+    payload = {
+        "categorie_id": 1,
+        "montant": 500.0,
+        "date_debut": "2026-01-01",
+        "date_fin": "2026-01-31"
+    }
+
+    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
+        mock_categorie,
+        None
+    ] # Insertion valide
+    
+    # On force le commit() à lever une exception inattendue
+    mock_db_session.commit.side_effect = Exception("Crash inattendu de la DB")
+
+    response = client.post("/api/budgets/", json=payload)
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Internal Server Error"
