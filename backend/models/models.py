@@ -1,8 +1,11 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from database import Base
 import enum
 
+# Erreur métier :
+class BudgetAlreadyExistsError(Exception):
+    pass
 
 # type de transaction
 class TypeTransaction(str, enum.Enum):
@@ -37,3 +40,15 @@ class Transaction(Base):
     @property
     def categorie(self):
         return self.categorie_obj.nom if self.categorie_obj else None
+
+class Budget(Base):
+    __tablename__ = "budget"
+
+    id = Column(Integer, primary_key=True, index=True)
+    montant_fixe = Column(Float, nullable=False)
+    debut_periode = Column(Date, nullable=False)
+    fin_periode = Column(Date, nullable=False)
+    
+    categorie_id = Column(Integer, ForeignKey('categorie.id'), nullable=False)
+
+    utilisateur_id = Column(Integer, ForeignKey('utilisateur.id'), nullable=False)

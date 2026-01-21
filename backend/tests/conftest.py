@@ -3,6 +3,10 @@ import pytest
 from unittest.mock import MagicMock
 from datetime import date, datetime
 
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
 # --- FIXTURES DE DONNÉES (DATA OBJECTS) ---
 
 @pytest.fixture
@@ -87,6 +91,13 @@ def mock_db_session():
     session.refresh.return_value = None
     session.rollback.return_value = None
     
+    def side_effect_refresh(instance):
+            if hasattr(instance, 'id') and instance.id is None:
+                instance.id = 1 
+            return None
+
+    session.refresh.side_effect = side_effect_refresh
+
     return session
 
 @pytest.fixture

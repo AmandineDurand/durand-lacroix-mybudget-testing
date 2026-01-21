@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import transactions, categories
+from routers import transactions, categories, budgets
 
 # Init
 app = FastAPI(
@@ -11,6 +11,7 @@ app = FastAPI(
 # Inclusion des routeurs
 app.include_router(transactions.router)
 app.include_router(categories.router)
+app.include_router(budgets.router)
 
 # Route de base
 @app.get("/")
