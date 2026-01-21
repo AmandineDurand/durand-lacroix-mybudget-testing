@@ -18,10 +18,10 @@ def test_definir_budget_valid(mock_db_session):
     nouveau_budget = service.add_budget(categorie_id, montant, debut, fin)
 
     assert isinstance(nouveau_budget, Budget)
-    assert nouveau_budget.categorie_id == categorie_id
-    assert nouveau_budget.montant == montant
-    assert nouveau_budget.date_debut == debut
-    assert nouveau_budget.date_fin == fin
+    assert nouveau_budget.categorie_id == categorie_id #type: ignore
+    assert nouveau_budget.montant == montant #type:ignore
+    assert nouveau_budget.date_debut == debut #type: ignore
+    assert nouveau_budget.date_fin == fin #type: ignore
     
     mock_db_session.add.assert_called_once()
     args, _ = mock_db_session.add.call_args
@@ -29,3 +29,17 @@ def test_definir_budget_valid(mock_db_session):
     
     mock_db_session.commit.assert_called_once()
     mock_db_session.refresh.assert_called_once_with(nouveau_budget)
+
+def test_definir_budget_dates_invalides(mock_db_session):
+    """
+    Vérifie qu'on ne peut pas créer un budget avec une date de fin antérieure au début.
+    """
+    service = BudgetService(mock_db_session)
+    
+    debut = date(2026, 2, 1)
+    fin = date(2026, 1, 1) 
+
+    with pytest.raises(ValueError) as excinfo:
+        service.add_budget(1, 100.0, debut, fin)
+    
+    assert "La date de fin doit être postérieure" in str(excinfo.value)
