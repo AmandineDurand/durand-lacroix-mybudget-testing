@@ -19,6 +19,15 @@ class BudgetService:
         if not categorie:
             raise ValueError(f"La catégorie avec l'ID {categorie_id} n'existe pas")
 
+        budget_existant = self.db.query(Budget).filter(
+            Budget.categorie_id == categorie_id,
+            Budget.date_debut == date_debut,
+            Budget.date_fin == date_fin
+        ).first()
+
+        if budget_existant:
+            raise ValueError("Un budget existe déjà pour cette catégorie et ces dates exactes")
+
         nouveau_budget = Budget(
             categorie_id=categorie_id,
             montant=montant,
