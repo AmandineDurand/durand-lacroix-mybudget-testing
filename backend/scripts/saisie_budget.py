@@ -12,6 +12,9 @@ class BudgetService:
         if date_fin < date_debut:
             raise ValueError("La date de fin doit être postérieure à la date de début")
 
+        if montant <= 0 :
+            raise ValueError("Le montant doit être strictement positif")
+
         nouveau_budget = Budget(
             categorie_id=categorie_id,
             montant=montant,
