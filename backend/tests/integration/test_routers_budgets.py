@@ -1,6 +1,7 @@
 from datetime import date
 from unittest.mock import MagicMock
 from models.models import Categorie
+from sqlalchemy.exc import IntegrityError
 
 def test_create_budget_endpoint_success(client, mock_db_session, mock_categorie):
     """
@@ -120,3 +121,28 @@ def test_create_budget_endpoint_montant_invalid(client, mock_db_session, mock_ca
     response = client.post("/api/budgets/", json=payload)
 
     assert response.status_code == 422
+
+def test_create_budget_integrity_error_race_condition(client, mock_db_session, mock_categorie):
+    """
+    Teste une 'race condition' où la validation logicielle passe, mais le commit DB échoue à cause d'une contrainte d'unicité.
+    """
+    payload = {
+        "categorie_id": 1,
+        "montant": 500.0,
+        "date_debut": "2026-01-01",
+        "date_fin": "2026-01-31"
+    }
+
+    # D'abord, comportement normal,
+    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
+        mock_categorie,
+        None 
+    ]
+
+    # MAIS le commit échoue (Simule la DB qui bloque)
+    mock_db_session.commit.side_effect = IntegrityError(None, None, Exception("Unique violation"))
+
+    response = client.post("/api/budgets/", json=payload)
+
+    assert response.status_code == 409
+    assert "Erreur d'intégrité" in response.json()["detail"]
