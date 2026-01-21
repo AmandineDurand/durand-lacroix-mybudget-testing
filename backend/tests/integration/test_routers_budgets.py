@@ -9,9 +9,9 @@ def test_create_budget_endpoint_success(client, mock_db_session, mock_categorie)
     """
     payload = {
         "categorie_id": 1,
-        "montant": 500.0,
-        "date_debut": "2026-01-01",
-        "date_fin": "2026-01-31"
+        "montant_fixe": 500.0,
+        "debut_periode": "2026-01-01",
+        "fin_periode": "2026-01-31"
     }
 
     mock_db_session.query.return_value.filter.return_value.first.side_effect = [
@@ -25,12 +25,12 @@ def test_create_budget_endpoint_success(client, mock_db_session, mock_categorie)
     
     data = response.json()
     assert data["categorie_id"] == 1
-    assert data["montant"] == 500.0
+    assert data["montant_fixe"] == 500.0
     assert "id" in data
 
 def test_create_budget_endpoint_categorie_invalid(client, mock_db_session):
     """Teste que la création d'un budget avec une catégorie inexistante renvoie une 400."""
-    payload = {"categorie_id": 1, "montant": 500.0, "date_debut": "2026-01-01", "date_fin": "2026-01-31"}
+    payload = {"categorie_id": 1, "montant_fixe": 500.0, "debut_periode": "2026-01-01", "fin_periode": "2026-01-31"}
 
     mock_db_session.query.return_value.filter.return_value.first.return_value = None # Catégorie non trouvée
 
@@ -41,7 +41,7 @@ def test_create_budget_endpoint_categorie_invalid(client, mock_db_session):
 
 def test_create_budget_endpoint_conflict(client, mock_db_session, mock_categorie):
     """Teste que le service levant une BudgetConflictError renvoie une 409."""
-    payload = {"categorie_id": 1, "montant": 500.0, "date_debut": "2026-01-01", "date_fin": "2026-01-31"}
+    payload = {"categorie_id": 1, "montant_fixe": 500.0, "debut_periode": "2026-01-01", "fin_periode": "2026-01-31"}
 
     def fake_query(model):
         q = MagicMock()
@@ -68,9 +68,9 @@ def test_create_budget_endpoint_internal_other_error(client, mock_db_session, mo
     """
     payload = {
         "categorie_id": 1,
-        "montant": 500.0,
-        "date_debut": "2026-01-01",
-        "date_fin": "2026-01-31"
+        "montant_fixe": 500.0,
+        "debut_periode": "2026-01-01",
+        "fin_periode": "2026-01-31"
     }
 
     mock_db_session.query.return_value.filter.return_value.first.side_effect = [
@@ -88,7 +88,7 @@ def test_create_budget_endpoint_internal_other_error(client, mock_db_session, mo
 
 def test_create_budget_endpoint_dates_invalid(client, mock_db_session, mock_categorie):
     """Teste que le service levant une ValueError renvoie une 400."""
-    payload = {"categorie_id": 1, "montant": 500.0, "date_debut": "2026-01-31", "date_fin": "2026-01-01"}
+    payload = {"categorie_id": 1, "montant_fixe": 500.0, "debut_periode": "2026-01-31", "fin_periode": "2026-01-01"}
     
     def fake_query(model):
         q = MagicMock()
@@ -106,7 +106,7 @@ def test_create_budget_endpoint_dates_invalid(client, mock_db_session, mock_cate
 
 def test_create_budget_endpoint_montant_invalid(client, mock_db_session, mock_categorie):
     """Teste que la création d'un budget avec un montant non positif renvoie une 400."""
-    payload = {"categorie_id": 1, "montant": -100.0, "date_debut": "2026-01-01", "date_fin": "2026-01-31"}
+    payload = {"categorie_id": 1, "montant_fixe": -100.0, "debut_periode": "2026-01-01", "fin_periode": "2026-01-31"}
 
     def fake_query(model):
         q = MagicMock()
@@ -128,9 +128,9 @@ def test_create_budget_integrity_error_race_condition(client, mock_db_session, m
     """
     payload = {
         "categorie_id": 1,
-        "montant": 500.0,
-        "date_debut": "2026-01-01",
-        "date_fin": "2026-01-31"
+        "montant_fixe": 500.0,
+        "debut_periode": "2026-01-01",
+        "fin_periode": "2026-01-31"
     }
 
     # D'abord, comportement normal,

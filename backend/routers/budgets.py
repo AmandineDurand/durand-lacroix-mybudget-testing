@@ -19,9 +19,9 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
 
         nouveau_budget = service.add_budget(
             categorie_id=budget.categorie_id,
-            montant=budget.montant,
-            date_debut=budget.date_debut,
-            date_fin=budget.date_fin
+            montant=budget.montant_fixe,
+            date_debut=budget.debut_periode,
+            date_fin=budget.fin_periode
         )
         return nouveau_budget
     except ValueError as e:
