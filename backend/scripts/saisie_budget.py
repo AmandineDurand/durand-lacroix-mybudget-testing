@@ -21,8 +21,8 @@ class BudgetService:
         
         budget_conflit = self.db.query(Budget).filter( #couvre unicité et chevauchement
             Budget.categorie_id == categorie_id,
-            Budget.date_debut <= date_fin,
-            Budget.date_fin >= date_debut
+            Budget.debut_periode <= date_fin,
+            Budget.fin_periode>= date_debut
         ).first()
 
         if budget_conflit:
@@ -33,9 +33,10 @@ class BudgetService:
 
         nouveau_budget = Budget(
             categorie_id=categorie_id,
-            montant=montant,
-            date_debut=date_debut,
-            date_fin=date_fin
+            montant_fixe=montant,
+            debut_periode=date_debut,
+            fin_periode=date_fin,
+            utilisateur_id= 1 #pour future utilisation multi user
         )
         
         self.db.add(nouveau_budget)

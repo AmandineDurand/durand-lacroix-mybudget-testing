@@ -42,11 +42,13 @@ class Transaction(Base):
         return self.categorie_obj.nom if self.categorie_obj else None
 
 class Budget(Base):
-    __tablename__ = "budgets"
+    __tablename__ = "budget"
 
     id = Column(Integer, primary_key=True, index=True)
-    montant = Column(Float, nullable=False)
-    date_debut = Column(Date, nullable=False)
-    date_fin = Column(Date, nullable=False)
+    montant_fixe = Column(Float, nullable=False)
+    debut_periode = Column(Date, nullable=False)
+    fin_periode = Column(Date, nullable=False)
     
     categorie_id = Column(Integer, ForeignKey('categorie.id'), nullable=False)
+
+    utilisateur_id = Column(Integer, ForeignKey('utilisateur.id'), nullable=False)

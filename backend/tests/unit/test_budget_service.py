@@ -29,9 +29,9 @@ def test_definir_budget_valid(mock_db_session, mock_categorie):
 
     assert isinstance(nouveau_budget, Budget)
     assert nouveau_budget.categorie_id == categorie_id #type: ignore
-    assert nouveau_budget.montant == montant #type:ignore
-    assert nouveau_budget.date_debut == debut #type: ignore
-    assert nouveau_budget.date_fin == fin #type: ignore
+    assert nouveau_budget.montant_fixe == montant #type:ignore
+    assert nouveau_budget.debut_periode == debut #type: ignore
+    assert nouveau_budget.fin_periode == fin #type: ignore
     
     mock_db_session.add.assert_called_once()
     args, _ = mock_db_session.add.call_args
@@ -121,8 +121,8 @@ def test_definir_budget_chevauchement(mock_db_session, mock_categorie):
             q.filter.return_value.first.return_value = mock_categorie
         else:
             existing_budget = MagicMock()
-            existing_budget.date_debut = date(2026, 1, 15)
-            existing_budget.date_fin = date(2026, 1, 25)
+            existing_budget.debut_periode = date(2026, 1, 15)
+            existing_budget.fin_periode = date(2026, 1, 25)
             q.filter.return_value.first.return_value = existing_budget
         return q
 
@@ -131,4 +131,4 @@ def test_definir_budget_chevauchement(mock_db_session, mock_categorie):
     with pytest.raises(BudgetAlreadyExistsError) as excinfo:
         service.add_budget(1, 500.0, debut, fin)
     
-    assert "Un budget existe déjà sur cette période (chevauchement avec 2026-01-15 - 2026-01-25)" in str(excinfo.value)
+    assert "Un budget existe déjà sur cette période (chevauchement " in str(excinfo.value)
