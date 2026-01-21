@@ -27,6 +27,18 @@ class BudgetService:
 
         if budget_existant:
             raise ValueError("Un budget existe déjà pour cette catégorie et ces dates exactes")
+        
+        budget_chevauché = self.db.query(Budget).filter(
+            Budget.categorie_id == categorie_id,
+            Budget.date_debut < date_fin,
+            Budget.date_fin > date_debut
+        ).first()
+
+        if budget_existant:
+            raise ValueError("Un budget existe déjà pour cette catégorie et ces dates exactes")
+        
+        if budget_chevauché:
+            raise ValueError("Un budget existe déjà sur cette période (chevauchement)")
 
         nouveau_budget = Budget(
             categorie_id=categorie_id,
