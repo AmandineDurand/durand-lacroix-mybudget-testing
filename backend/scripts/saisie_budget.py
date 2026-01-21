@@ -49,6 +49,9 @@ class BudgetService:
     def get_budget_status(self, budget_id: int) -> BudgetStatus:
         budget = self.db.query(Budget).filter(Budget.id == budget_id).first()
 
+        if not budget:
+            raise ValueError(f"Le budget {budget_id} n'existe pas")
+
         transactions = self.db.query(Transaction).filter(
             Transaction.categorie_id == budget.categorie_id,
             Transaction.date >= budget.debut_periode,
