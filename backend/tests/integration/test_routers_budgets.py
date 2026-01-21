@@ -85,7 +85,10 @@ def test_create_budget_endpoint_conflict(client, mock_db_session, mock_categorie
         if model is Categorie:
             q.filter.return_value.first.return_value = mock_categorie
         else:
-            q.filter.return_value.first.return_value = True  #un budget existe déjà
+            existing_budget = MagicMock()
+            existing_budget.date_debut = date(2026, 1, 15)
+            existing_budget.date_fin = date(2026, 1, 25)
+            q.filter.return_value.first.return_value = existing_budget
         return q
 
     mock_db_session.query.side_effect = fake_query

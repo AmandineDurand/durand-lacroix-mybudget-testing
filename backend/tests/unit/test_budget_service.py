@@ -2,7 +2,7 @@ import pytest
 from datetime import date
 from unittest.mock import MagicMock
 from scripts.saisie_budget import BudgetService
-from models.models import Budget, Categorie
+from models.models import Budget, Categorie, BudgetAlreadyExistsError
 
 def test_definir_budget_valid(mock_db_session, mock_categorie):
     """
@@ -103,7 +103,7 @@ def test_definir_budget_doublon(mock_db_session, mock_categorie):
 
     mock_db_session.query.side_effect = fake_query_dup
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(BudgetAlreadyExistsError) as excinfo:
         service.add_budget(1, 500.0, debut, fin)
     
     assert "Un budget existe déjà pour cette catégorie et ces dates exactes" in str(excinfo.value)
@@ -128,7 +128,7 @@ def test_definir_budget_chevauchement(mock_db_session, mock_categorie):
 
     mock_db_session.query.side_effect = fake_query_dup
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(BudgetAlreadyExistsError) as excinfo:
         service.add_budget(1, 500.0, debut, fin)
     
     assert "Un budget existe déjà sur cette période (chevauchement avec 2026-01-15 - 2026-01-25)" in str(excinfo.value)

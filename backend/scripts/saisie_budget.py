@@ -1,7 +1,7 @@
 # scripts/budget_service.py
 from datetime import date
 from sqlalchemy.orm import Session
-from models.models import Budget, Categorie
+from models.models import Budget, Categorie, BudgetAlreadyExistsError
 
 class BudgetService:
     def __init__(self, db: Session):
@@ -27,9 +27,9 @@ class BudgetService:
 
         if budget_conflit:
             if budget_conflit.date_debut == date_debut and budget_conflit.date_fin == date_fin: #type: ignore
-                 raise ValueError("Un budget existe déjà pour cette catégorie et ces dates exactes")
+                 raise BudgetAlreadyExistsError("Un budget existe déjà pour cette catégorie et ces dates exactes")
             
-            raise ValueError(f"Un budget existe déjà sur cette période (chevauchement avec {budget_conflit.date_debut} - {budget_conflit.date_fin})")
+            raise BudgetAlreadyExistsError(f"Un budget existe déjà sur cette période (chevauchement avec {budget_conflit.date_debut} - {budget_conflit.date_fin})")
 
         nouveau_budget = Budget(
             categorie_id=categorie_id,
