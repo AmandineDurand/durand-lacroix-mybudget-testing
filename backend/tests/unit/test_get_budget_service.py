@@ -54,3 +54,12 @@ def test_get_budget_status_nominal(mock_db_session):
     assert resultat.montant_restant == 50.0  # 100 - 50
     assert resultat.pourcentage_consomme == 50.0 # (50/100)*100
     assert resultat.est_depasse is False
+
+def test_get_budget_status_not_found(mock_db_session):
+    """Doit lever une ValueError si le budget n'existe pas"""
+    service = BudgetService(mock_db_session)
+    
+    mock_db_session.query.return_value.filter.return_value.first.return_value = None
+
+    with pytest.raises(ValueError, match="n'existe pas"):
+        service.get_budget_status(999)
