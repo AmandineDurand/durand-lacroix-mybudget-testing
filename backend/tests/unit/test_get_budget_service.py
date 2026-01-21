@@ -63,3 +63,39 @@ def test_get_budget_status_not_found(mock_db_session):
 
     with pytest.raises(ValueError, match="n'existe pas"):
         service.get_budget_status(999)
+
+def test_get_budget_status_overdraft(mock_db_session):
+    """
+    Test Dépassement : Budget 100€, Dépense 120€.
+    Attendu : Restant -20€, Dépassement détecté.
+    """
+    service = BudgetService(mock_db_session)
+    
+    mock_budget = MagicMock(spec=Budget)
+    mock_budget.id = 1
+    mock_budget.montant_fixe = 100.0
+    mock_budget.categorie_id = 1
+    mock_budget.debut_periode = date(2026, 1, 1)
+    mock_budget.fin_periode = date(2026, 1, 31)
+    
+    t1 = MagicMock(spec=Transaction)
+    t1.montant = 120.0
+    t1.type = "DEPENSE"
+    
+    def query_side_effect(model):
+            query_mock = MagicMock()
+            query_mock.filter.return_value = query_mock 
+            
+            if model == Budget:
+                query_mock.first.return_value = mock_budget
+            elif model == Transaction:
+                query_mock.all.return_value = [t1]
+            return query_mock
+
+    mock_db_session.query.side_effect = query_side_effect
+
+    result = service.get_budget_status(1)
+
+    assert result.est_depasse is True
+    assert result.montant_restant == -20.0
+    assert result.pourcentage_consomme == 120.0
