@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import func, cast, Date
+from sqlalchemy import func, cast, and_, Date
 from sqlalchemy.orm import Session
 from models.models import Budget, Categorie, BudgetAlreadyExistsError, Transaction
 from schemas.budget import BudgetStatus
@@ -85,11 +85,24 @@ class BudgetService:
             est_depasse=est_depasse  #type: ignore
         )
     
-    def get_budgets(self, categorie_id: int | None = None, debut_periode: date | None = None, fin_periode: date | None = None, skip: int = 0, limit: int = 0) -> list[Budget]:
+    def get_budgets(self, categorie_id: int | None = None, debut_periode: date | None = None, fin_periode: date | None = None, skip: int = 0, limit: int = 0) -> list[BudgetStatus]:
         """
         Récupère la liste des budgets, avec filtres optionnels.
         """
-        query = self.db.query(Budget)
+        query = self.db.query(
+            Budget,
+            func.coalesce(func.sum(Transaction.montant), 0.0).label("total_depense")
+        )
+
+        query = query.outerjoin(
+            Transaction,
+            and_(
+                Budget.categorie_id == Transaction.categorie_id,
+                Transaction.type == "DEPENSE",
+                cast(Transaction.date, Date) >= Budget.debut_periode,
+                cast(Transaction.date, Date) <= Budget.fin_periode
+            )
+        )
 
         if debut_periode and fin_periode and debut_periode > fin_periode:
             raise ValueError("La date de début doit être antérieure ou égale à la date de fin.")
@@ -106,7 +119,37 @@ class BudgetService:
         if fin_periode:
             query = query.filter(cast(Budget.debut_periode, Date) <= fin_periode)
 
+        query = query.group_by(Budget.id)
+
         if limit > 0:
             query = query.offset(skip).limit(limit)
+
+        results = query.all()
+
+        budget_status_list = []
+        for budget_obj, total_depense in results:
             
-        return query.all()
+            # Calculs métier
+            restant = budget_obj.montant_fixe - total_depense
+            
+            pourcentage = 0.0
+            if budget_obj.montant_fixe > 0:
+                pourcentage = round((total_depense / budget_obj.montant_fixe) * 100, 2)
+            
+            est_depasse = round(restant, 2) < 0
+
+            # Création de l'objet de réponse enrichi
+            status_obj = BudgetStatus(
+                id=budget_obj.id,
+                categorie_id=budget_obj.categorie_id,
+                montant_fixe=budget_obj.montant_fixe,
+                debut_periode=budget_obj.debut_periode,
+                fin_periode=budget_obj.fin_periode,
+                montant_depense=total_depense,
+                montant_restant=restant,
+                pourcentage_consomme=pourcentage,
+                est_depasse=est_depasse
+            )
+            budget_status_list.append(status_obj)
+            
+        return budget_status_list
