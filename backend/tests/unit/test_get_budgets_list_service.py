@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from datetime import date
 from scripts.saisie_budget import BudgetService
-from models.models import Budget, Categorie
+from models.models import Budget, Categorie, CategorieNotFoundError
 from schemas.budget import BudgetStatus
 
 def test_get_budgets_list_filters(mock_db_session):
@@ -113,7 +113,7 @@ def test_get_budgets_unknown_category(mock_db_session):
 
     mock_db_session.query.side_effect = query_side_effect
 
-    with pytest.raises(ValueError, match="Catégorie introuvable"):
+    with pytest.raises(CategorieNotFoundError, match="Catégorie introuvable"):
         service.get_budgets(categorie_id=unknown_cat_id)
 
 def test_get_budgets_pagination(mock_db_session):
