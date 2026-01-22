@@ -117,3 +117,36 @@ def test_get_budgets_pagination(mock_db_session):
     
     query_mock.offset.assert_called_with(skip_val)
     query_mock.limit.assert_called_with(limit_val)
+
+def test_get_budgets_optimal_calculation(mock_db_session, mock_budget):
+    """
+    Vérifie que le service calcule les pourcentages via une agrégation SQL (optimisation),
+    et retourne des objets BudgetStatus enrichis.
+    """
+    service = BudgetService(mock_db_session)
+
+    # 2. Mock de la requête complexe (Join + Aggregation)
+    query_mock = MagicMock()
+    mock_db_session.query.return_value = query_mock
+    
+    # Fluent interface : on s'assure que toutes les méthodes retournent le mock
+    query_mock.outerjoin.return_value = query_mock
+    query_mock.filter.return_value = query_mock
+    query_mock.group_by.return_value = query_mock
+    query_mock.offset.return_value = query_mock
+    query_mock.limit.return_value = query_mock
+
+    query_mock.all.return_value = [(mock_budget, 20.0)]
+
+
+    results = service.get_budgets()
+
+    assert len(results) == 1
+    assert isinstance(results[0], BudgetStatus)
+    
+    assert results[0].montant_depense == 20.0
+    assert results[0].montant_restant == 80.0
+    assert results[0].pourcentage_consomme == 20.0
+    
+    query_mock.outerjoin.assert_called()
+    query_mock.group_by.assert_called()
