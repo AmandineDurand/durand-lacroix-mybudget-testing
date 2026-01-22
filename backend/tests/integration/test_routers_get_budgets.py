@@ -40,3 +40,13 @@ def test_get_budget_status_endpoint_not_found(client, mock_db_session):
 
     assert response.status_code == 404
     assert "n'existe pas" in response.json()["detail"]
+
+def test_get_budget_status_endpoint_internal_error(client, mock_db_session):
+    """Teste que l'API renvoie 500 si une erreur inattendue survient (ex: crash DB)."""
+
+    mock_db_session.query.side_effect = Exception("Erreur inattendue de la BDD")
+
+    response = client.get("/api/budgets/1")
+
+    assert response.status_code == 500
+    assert "Internal Server Error" in response.json()["detail"]
