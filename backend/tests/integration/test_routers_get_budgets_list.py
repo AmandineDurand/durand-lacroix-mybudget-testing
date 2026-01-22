@@ -59,3 +59,13 @@ def test_get_budgets_inverted_dates_422(client):
     response = client.get(f"/api/budgets/?debut={debut}&fin={fin}")
 
     assert response.status_code == 422
+
+def test_get_budgets_generic_400(client, mock_db_session):
+    """Test 400 : Autre erreur métier (ValueError générique)."""
+
+    mock_db_session.query.side_effect = ValueError("Erreur métier générique")
+
+    response = client.get("/api/budgets/")
+
+    assert response.status_code == 400
+    assert "Erreur métier" in response.json()["detail"]
