@@ -85,7 +85,7 @@ class BudgetService:
             est_depasse=est_depasse  #type: ignore
         )
     
-    def get_budgets(self, categorie_id: int | None = None, debut_periode: date | None = None, fin_periode: date | None = None) -> list[Budget]:
+    def get_budgets(self, categorie_id: int | None = None, debut_periode: date | None = None, fin_periode: date | None = None, skip: int = 0, limit: int = 0) -> list[Budget]:
         """
         Récupère la liste des budgets, avec filtres optionnels.
         """
@@ -105,5 +105,7 @@ class BudgetService:
 
         if fin_periode:
             query = query.filter(cast(Budget.debut_periode, Date) <= fin_periode)
+
+        query = query.offset(skip).limit(limit)
             
         return query.all()
