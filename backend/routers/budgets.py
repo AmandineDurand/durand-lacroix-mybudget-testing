@@ -1,5 +1,6 @@
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
@@ -68,3 +69,5 @@ def get_budgets(
         return budgets
     except CategorieNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
