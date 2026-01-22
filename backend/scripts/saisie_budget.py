@@ -93,8 +93,11 @@ class BudgetService:
 
         if debut_periode and fin_periode and debut_periode > fin_periode:
             raise ValueError("La date de début doit être antérieure ou égale à la date de fin.")
-
+        
         if categorie_id is not None:
+            categorie_existe = self.db.query(Categorie).filter(Categorie.id == categorie_id).first()
+            if not categorie_existe:
+                raise ValueError(f"Catégorie introuvable (ID: {categorie_id})")
             query = query.filter(Budget.categorie_id == categorie_id)
 
         if debut_periode:
