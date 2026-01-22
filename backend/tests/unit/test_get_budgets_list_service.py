@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from datetime import date
 from scripts.saisie_budget import BudgetService
 from models.models import Budget, Categorie
+from schemas.budget import BudgetStatus
 
 def test_get_budgets_list_filters(mock_db_session):
     """Test Récupérer une liste de budgets avec filtres."""
@@ -18,6 +19,8 @@ def test_get_budgets_list_filters(mock_db_session):
     query_mock = MagicMock()
     mock_db_session.query.return_value = query_mock
     query_mock.filter.return_value = query_mock
+    query_mock.offset.return_value = query_mock
+    query_mock.limit.return_value = query_mock
     query_mock.all.return_value = [mock_budget_1]
 
     result = service.get_budgets(
