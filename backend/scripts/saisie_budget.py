@@ -94,10 +94,10 @@ class BudgetService:
         if categorie_id is not None:
             query = query.filter(Budget.categorie_id == categorie_id)
 
-        if debut_periode and fin_periode:
-            query = query.filter(
-                Budget.debut_periode <= fin_periode,
-                Budget.fin_periode >= debut_periode
-            )
+        if debut_periode:
+            query = query.filter(Budget.fin_periode >= debut_periode)
+
+        if fin_periode:
+            query = query.filter(Budget.debut_periode <= fin_periode)
             
         return query.all()
