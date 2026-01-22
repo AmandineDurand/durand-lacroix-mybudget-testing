@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from database import get_db
 from scripts.saisie_budget import BudgetService
 from schemas.budget import BudgetCreate, BudgetRead, BudgetStatus
-from models.models import BudgetAlreadyExistsError
+from models.models import BudgetAlreadyExistsError, BudgetNotFoundError
 
 router = APIRouter(
     prefix="/api/budgets",
@@ -44,8 +44,10 @@ def get_budget_status(budget_id: int, db: Session = Depends(get_db)):
         budget_status = service.get_budget_status(budget_id)
         return budget_status
     except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except BudgetNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except Exception:
+    except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error")
     
 @router.get("/", response_model=list[BudgetStatus])
@@ -59,7 +61,7 @@ def get_budgets(
 ):
     """Récupère la liste des budgets enrichis (statuts calculés)."""
     service = BudgetService(db)
-    
+
     budgets = service.get_budgets(
         categorie_id=categorie_id,
         debut_periode=debut,

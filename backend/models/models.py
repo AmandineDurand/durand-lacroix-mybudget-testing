@@ -7,6 +7,9 @@ import enum
 class BudgetAlreadyExistsError(Exception):
     pass
 
+class BudgetNotFoundError(Exception):
+    pass
+
 # type de transaction
 class TypeTransaction(str, enum.Enum):
     REVENU = "revenu"
