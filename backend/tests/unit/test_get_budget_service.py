@@ -5,7 +5,7 @@ from scripts.saisie_budget import BudgetService
 from models.models import Budget, Transaction
 from schemas.budget import BudgetStatus
 
-def test_get_budget_status_nominal(mock_db_session):
+def test_get_budget_status_nominal(mock_db_session, mock_budget):
     """
     Test nominal : 
     Budget de 100€
@@ -14,14 +14,6 @@ def test_get_budget_status_nominal(mock_db_session):
     """
     service = BudgetService(mock_db_session)
     budget_id_test = 1
-    categorie_id_test = 5
-
-    mock_budget = MagicMock(spec=Budget)
-    mock_budget.id = budget_id_test
-    mock_budget.montant_fixe = 100.0
-    mock_budget.categorie_id = categorie_id_test
-    mock_budget.debut_periode = date(2026, 1, 1)
-    mock_budget.fin_periode = date(2026, 1, 31)
 
 
     t1 = MagicMock(spec=Transaction)
@@ -64,19 +56,12 @@ def test_get_budget_status_not_found(mock_db_session):
     with pytest.raises(ValueError, match="n'existe pas"):
         service.get_budget_status(999)
 
-def test_get_budget_status_overdraft(mock_db_session):
+def test_get_budget_status_overdraft(mock_db_session, mock_budget):
     """
     Test Dépassement : Budget 100€, Dépense 120€.
     Attendu : Restant -20€, Dépassement détecté.
     """
     service = BudgetService(mock_db_session)
-    
-    mock_budget = MagicMock(spec=Budget)
-    mock_budget.id = 1
-    mock_budget.montant_fixe = 100.0
-    mock_budget.categorie_id = 1
-    mock_budget.debut_periode = date(2026, 1, 1)
-    mock_budget.fin_periode = date(2026, 1, 31)
     
     t1 = MagicMock(spec=Transaction)
     t1.montant = 120.0

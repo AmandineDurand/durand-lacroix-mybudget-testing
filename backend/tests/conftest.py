@@ -1,5 +1,6 @@
-# conftest.py
 import pytest
+import os
+import sys
 from unittest.mock import MagicMock
 from datetime import date, datetime
 
@@ -7,13 +8,15 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
+from models.models import Transaction, Budget, Categorie
+
 # --- FIXTURES DE DONNÉES (DATA OBJECTS) ---
 
 @pytest.fixture
 def mock_categorie():
     """Crée un faux objet Categorie basé sur le modèle SQLAlchemy"""
     # On utilise un MagicMock qui imite la structure de l'objet Categorie
-    cat = MagicMock()
+    cat = MagicMock(spec=Categorie)
     cat.id = 1
     cat.nom = "Alimentation"
     cat.icone = "🍔"
@@ -22,7 +25,7 @@ def mock_categorie():
 @pytest.fixture
 def mock_transaction():
     """Crée un faux objet Transaction basé sur le modèle SQLAlchemy"""
-    transaction = MagicMock()
+    transaction = MagicMock(spec=Transaction)
     transaction.id = 1
     transaction.montant = 50.0
     transaction.type = "DEPENSE"
@@ -32,14 +35,25 @@ def mock_transaction():
     return transaction
 
 @pytest.fixture
+def mock_budget():
+    """Crée un faux objet Budget basé sur le modèle SQLAlchemy"""
+    budget = MagicMock(spec=Budget)
+    budget.id = 1
+    budget.categorie_id = 1
+    budget.montant_fixe = 100.0
+    budget.debut_periode = date(2026, 1, 1)
+    budget.fin_periode = date(2026, 1, 31)
+    return budget
+
+@pytest.fixture
 def mock_category_list():
     """Retourne une liste de fausses catégories pour les tests d'agrégation"""
-    c1 = MagicMock()
+    c1 = MagicMock(spec=Categorie)
     c1.id = 1
     c1.nom = "Alimentation"
     c1.icone = "🍔"
 
-    c2 = MagicMock()
+    c2 = MagicMock(spec=Categorie)
     c2.id = 2
     c2.nom = "Transport"
     c2.icone = "🚗"
@@ -49,7 +63,7 @@ def mock_category_list():
 @pytest.fixture
 def mock_transaction_list(mock_categorie):
     """Retourne une liste de fausses transactions pour les tests d'agrégation"""
-    t1 = MagicMock()
+    t1 = MagicMock(spec=Transaction)
     t1.id = 1
     t1.montant = 50.0
     t1.type = "DEPENSE"
@@ -57,7 +71,7 @@ def mock_transaction_list(mock_categorie):
     t1.categorie_id = 1
     t1.categorie_obj = mock_categorie
 
-    t2 = MagicMock()
+    t2 = MagicMock(spec=Transaction)
     t2.id = 2
     t2.montant = 25.50
     t2.type = "REVENU"
@@ -65,7 +79,7 @@ def mock_transaction_list(mock_categorie):
     t2.categorie_id = 1
     t2.categorie_obj = mock_categorie
 
-    t3 = MagicMock()
+    t3 = MagicMock(spec=Transaction)
     t3.id = 3
     t3.montant = 100.0
     t3.type = "DEPENSE"
