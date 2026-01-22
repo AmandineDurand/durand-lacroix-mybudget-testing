@@ -62,3 +62,12 @@ def test_get_budgets_filter_end_only(mock_db_session):
     service.get_budgets(fin_periode=date_fin)
 
     assert query_mock.filter.call_count >= 1
+
+def test_get_budgets_invalid_date_range(mock_db_session):
+    """Vérifie qu'une erreur est levée si date_debut > date_fin."""
+    service = BudgetService(mock_db_session)
+    p_start = date(2026, 2, 1)
+    p_end = date(2026, 1, 1)
+
+    with pytest.raises(ValueError, match="La date de début doit être antérieure"):
+        service.get_budgets(debut_periode=p_start, fin_periode=p_end)
