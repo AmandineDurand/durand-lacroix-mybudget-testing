@@ -106,6 +106,7 @@ class BudgetService:
         if fin_periode:
             query = query.filter(cast(Budget.debut_periode, Date) <= fin_periode)
 
-        query = query.offset(skip).limit(limit)
+        if limit > 0:
+            query = query.offset(skip).limit(limit)
             
         return query.all()
