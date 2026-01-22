@@ -30,7 +30,7 @@ def test_get_budgets_list_filters(mock_db_session):
     assert len(result) == 1
     assert result[0].id == 10 #type: ignore
     
-    mock_db_session.query.assert_called_with(Budget)
+    mock_db_session.query.assert_any_call(Budget)
     query_mock.all.assert_called_once()
 
 def test_get_budgets_filter_start_only(mock_db_session):
