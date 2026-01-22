@@ -15,13 +15,22 @@ def test_get_budgets_list_filters(mock_db_session):
     
     mock_budget_1 = MagicMock(spec=Budget)
     mock_budget_1.id = 10
+    mock_budget_1.montant_fixe = 100.0
+    mock_budget_1.debut_periode = date(2026, 1, 1)
+    mock_budget_1.fin_periode = date(2026, 1, 31)
+    mock_budget_1.categorie_id = 1
     
     query_mock = MagicMock()
     mock_db_session.query.return_value = query_mock
+    query_mock.outerjoin.return_value = query_mock
     query_mock.filter.return_value = query_mock
+    query_mock.group_by.return_value = query_mock
     query_mock.offset.return_value = query_mock
     query_mock.limit.return_value = query_mock
-    query_mock.all.return_value = [mock_budget_1]
+    
+    query_mock.all.return_value = [(mock_budget_1, 0.0)]
+    
+    query_mock.first.return_value = MagicMock()
 
     result = service.get_budgets(
         categorie_id=cat_id, 
@@ -33,7 +42,6 @@ def test_get_budgets_list_filters(mock_db_session):
     assert len(result) == 1
     assert result[0].id == 10 #type: ignore
     
-    mock_db_session.query.assert_any_call(Budget)
     query_mock.all.assert_called_once()
 
 def test_get_budgets_filter_start_only(mock_db_session):
@@ -43,7 +51,12 @@ def test_get_budgets_filter_start_only(mock_db_session):
 
     query_mock = MagicMock()
     mock_db_session.query.return_value = query_mock
+    query_mock.outerjoin.return_value = query_mock
     query_mock.filter.return_value = query_mock
+    query_mock.group_by.return_value = query_mock
+    query_mock.offset.return_value = query_mock
+    query_mock.limit.return_value = query_mock
+    
     query_mock.all.return_value = []
 
     service.get_budgets(debut_periode=date_debut)
@@ -59,7 +72,12 @@ def test_get_budgets_filter_end_only(mock_db_session):
 
     query_mock = MagicMock()
     mock_db_session.query.return_value = query_mock
+    query_mock.outerjoin.return_value = query_mock
     query_mock.filter.return_value = query_mock
+    query_mock.group_by.return_value = query_mock
+    query_mock.offset.return_value = query_mock
+    query_mock.limit.return_value = query_mock
+    
     query_mock.all.return_value = []
 
     service.get_budgets(fin_periode=date_fin)
@@ -80,13 +98,15 @@ def test_get_budgets_unknown_category(mock_db_session):
     service = BudgetService(mock_db_session)
     unknown_cat_id = 999
 
-    def query_side_effect(model):
+    def query_side_effect(*args):
         query_mock = MagicMock()
+        query_mock.outerjoin.return_value = query_mock
         query_mock.filter.return_value = query_mock
         
-        if model is Categorie:
+
+        if args and args[0] is Categorie:
             query_mock.first.return_value = None
-        elif model is Budget:
+        else:
             query_mock.all.return_value = []
             
         return query_mock
@@ -108,6 +128,9 @@ def test_get_budgets_pagination(mock_db_session):
     mock_db_session.query.return_value = query_mock
     query_mock.filter.return_value = query_mock
     
+    query_mock.outerjoin.return_value = query_mock
+    query_mock.filter.return_value = query_mock
+    query_mock.group_by.return_value = query_mock
 
     query_mock.offset.return_value = query_mock
     query_mock.limit.return_value = query_mock
