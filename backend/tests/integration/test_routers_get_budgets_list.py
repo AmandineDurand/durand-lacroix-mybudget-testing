@@ -78,3 +78,30 @@ def test_get_budgets_internal_error_500(client, mock_db_session):
 
     assert response.status_code == 500
     assert "Internal Server Error" in response.json()["detail"]
+
+def test_get_budgets_empty_transaction_zero(client, mock_db_session):
+    """Vérifie qu'un budget sans transactions remonte bien avec 0€ de dépense."""
+    mock_budget = MagicMock(spec=Budget)
+    mock_budget.id = 2
+    mock_budget.montant_fixe = 500.0
+    mock_budget.categorie_id = 1
+    mock_budget.debut_periode = date(2023, 1, 1)
+    mock_budget.fin_periode = date(2023, 1, 31)
+    
+    query_mock = MagicMock()
+    mock_db_session.query.return_value = query_mock
+    query_mock.outerjoin.return_value = query_mock
+    query_mock.filter.return_value = query_mock
+    query_mock.group_by.return_value = query_mock
+    query_mock.offset.return_value = query_mock
+    query_mock.limit.return_value = query_mock
+    query_mock.first.return_value = MagicMock()
+
+    query_mock.all.return_value = [(mock_budget, 0.0)]
+
+    response = client.get("/api/budgets/")
+    
+    data = response.json()[0]
+    assert data["montant_depense"] == 0.0
+    assert data["montant_restant"] == 500.0
+    assert data["pourcentage_consomme"] == 0.0
