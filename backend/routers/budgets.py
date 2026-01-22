@@ -39,5 +39,8 @@ def get_budget_status(budget_id: int, db: Session = Depends(get_db)):
     Récupère l'état d'un budget (consommé, restant) par son ID.
     """
     service = BudgetService(db)
-    budget_status = service.get_budget_status(budget_id)
-    return budget_status
+    try:
+        budget_status = service.get_budget_status(budget_id)
+        return budget_status
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
