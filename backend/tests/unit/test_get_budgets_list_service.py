@@ -173,3 +173,24 @@ def test_get_budgets_optimal_calculation(mock_db_session, mock_budget):
     
     query_mock.outerjoin.assert_called()
     query_mock.group_by.assert_called()
+
+def test_get_budgets_list_precision(mock_db_session, mock_budget):
+    """Vérifie que get_budgets arrondit correctement les montants."""
+    service = BudgetService(mock_db_session)
+    
+    valeur_imprecise = 66.6666666666
+    
+    query_mock = MagicMock()
+    mock_db_session.query.return_value = query_mock
+    query_mock.outerjoin.return_value = query_mock
+    query_mock.filter.return_value = query_mock
+    query_mock.group_by.return_value = query_mock
+    query_mock.offset.return_value = query_mock
+    query_mock.limit.return_value = query_mock
+    
+    query_mock.all.return_value = [(mock_budget, valeur_imprecise)]
+
+    results = service.get_budgets()
+
+    assert results[0].montant_depense == 66.67
+    assert results[0].montant_restant == 33.33

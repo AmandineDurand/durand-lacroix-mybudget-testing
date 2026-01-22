@@ -68,3 +68,28 @@ def test_get_budget_status_overdraft(mock_db_session, mock_budget):
     assert result.est_depasse is True
     assert result.montant_restant == -20.0
     assert result.pourcentage_consomme == 120.0
+
+def test_get_budget_status_precision(mock_db_session, mock_budget):
+    """
+    Vérifie que get_budget_status arrondit correctement les montants (2 décimales).
+    Cas : 100€ - 33.33333333€ = 66.66666667€ -> Doit devenir 66.67€
+    """
+    service = BudgetService(mock_db_session)
+    
+    valeur_imprecise = 33.3333333333
+    
+
+    def side_effect(model_or_expr):
+        q = MagicMock()
+        if model_or_expr is Budget:
+            q.filter.return_value.first.return_value = mock_budget
+        else:
+            q.filter.return_value.scalar.return_value = valeur_imprecise
+        return q
+
+    mock_db_session.query.side_effect = side_effect
+
+    result = service.get_budget_status(1)
+
+    assert result.montant_depense == 33.33
+    assert result.montant_restant == 66.67
