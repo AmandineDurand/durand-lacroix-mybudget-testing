@@ -91,6 +91,9 @@ class BudgetService:
         """
         query = self.db.query(Budget)
 
+        if debut_periode and fin_periode and debut_periode > fin_periode:
+            raise ValueError("La date de début doit être antérieure ou égale à la date de fin.")
+
         if categorie_id is not None:
             query = query.filter(Budget.categorie_id == categorie_id)
 
