@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from models.models import Budget, Transaction
 from scripts.saisie_budget import BudgetService
 
-def test_get_budget_status_endpoint_success(client, mock_db_session, mock_budget, mock_transaction):
+def test_get_budget_status_endpoint_success(client, mock_db_session, mock_budget):
     """
     Teste la route GET /api/budgets/{id}. Budget de 100€, une dépense de 50€.
     Attendu : 200 OK, reste 50€.
@@ -15,8 +15,8 @@ def test_get_budget_status_endpoint_success(client, mock_db_session, mock_budget
         q = MagicMock()
         if model is Budget:
             q.filter.return_value.first.return_value = mock_budget
-        elif model is Transaction:
-            q.filter.return_value.all.return_value = [mock_transaction]
+        else:
+            q.filter.return_value.scalar.return_value= 50.0
         return q
 
     mock_db_session.query.side_effect = query_side_effect
