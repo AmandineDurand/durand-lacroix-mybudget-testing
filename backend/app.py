@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status, Request
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from routers import transactions, categories, budgets
 
 # Init
@@ -25,3 +27,10 @@ def root():
             "docs": "/docs"
         }
     }
+
+@app.exception_handler(ValidationError)
+async def pydantic_validation_exception_handler(request: Request, exc: ValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": str(exc)}
+    )
