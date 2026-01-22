@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
-from scripts.saisie_budget import BudgetService 
-from schemas.budget import BudgetCreate, BudgetRead
+from scripts.saisie_budget import BudgetService
+from schemas.budget import BudgetCreate, BudgetRead, BudgetStatus
 from models.models import BudgetAlreadyExistsError
 
 router = APIRouter(
@@ -32,3 +32,12 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Erreur d'intégrité de la base de donnée")
     except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+    
+@router.get("/{budget_id}", response_model=BudgetStatus)
+def get_budget_status(budget_id: int, db: Session = Depends(get_db)):
+    """
+    Récupère l'état d'un budget (consommé, restant) par son ID.
+    """
+    service = BudgetService(db)
+    budget_status = service.get_budget_status(budget_id)
+    return budget_status
