@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from datetime import date
 from scripts.saisie_budget import BudgetService
-from models.models import Budget
+from models.models import Budget, Categorie
 
 def test_get_budgets_list_filters(mock_db_session):
     """Test Récupérer une liste de budgets avec filtres."""
@@ -71,3 +71,24 @@ def test_get_budgets_invalid_date_range(mock_db_session):
 
     with pytest.raises(ValueError, match="La date de début doit être antérieure"):
         service.get_budgets(debut_periode=p_start, fin_periode=p_end)
+
+def test_get_budgets_unknown_category(mock_db_session):
+    """Vérifie qu'une erreur est levée si on filtre sur une catégorie qui n'existe pas"""
+    service = BudgetService(mock_db_session)
+    unknown_cat_id = 999
+
+    def query_side_effect(model):
+        query_mock = MagicMock()
+        query_mock.filter.return_value = query_mock
+        
+        if model is Categorie:
+            query_mock.first.return_value = None
+        elif model is Budget:
+            query_mock.all.return_value = []
+            
+        return query_mock
+
+    mock_db_session.query.side_effect = query_side_effect
+
+    with pytest.raises(ValueError, match="Catégorie introuvable"):
+        service.get_budgets(categorie_id=unknown_cat_id)
