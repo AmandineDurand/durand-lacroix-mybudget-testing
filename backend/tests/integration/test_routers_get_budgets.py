@@ -30,3 +30,13 @@ def test_get_budget_status_endpoint_success(client, mock_db_session, mock_budget
     assert data["montant_depense"] == 50.0
     assert data["montant_restant"] == 50.0
     assert data["est_depasse"] is False
+
+def test_get_budget_status_endpoint_not_found(client, mock_db_session):
+    """Teste que l'API renvoie 404 si le budget n'existe pas."""
+    
+    mock_db_session.query.return_value.filter.return_value.first.return_value = None
+
+    response = client.get("/api/budgets/999")
+
+    assert response.status_code == 404
+    assert "n'existe pas" in response.json()["detail"]
