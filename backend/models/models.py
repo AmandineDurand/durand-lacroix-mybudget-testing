@@ -10,6 +10,9 @@ class BudgetAlreadyExistsError(Exception):
 class BudgetNotFoundError(Exception):
     pass
 
+class CategorieNotFoundError(Exception):
+    pass
+
 # type de transaction
 class TypeTransaction(str, enum.Enum):
     REVENU = "revenu"
