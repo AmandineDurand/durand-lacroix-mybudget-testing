@@ -9,30 +9,18 @@ def test_get_budget_status_nominal(mock_db_session, mock_budget):
     """
     Test nominal : 
     Budget de 100€
-    Dépenses : 20€ + 30€ = 50€
-    Attendu : Restant 50€, 50% consommé
+    Dépenses : 70€
+    Attendu : Restant 30€, 70% consommé
     """
     service = BudgetService(mock_db_session)
     budget_id_test = 1
-
-
-    t1 = MagicMock(spec=Transaction)
-    t1.montant = 20.0
-    t1.type = "DEPENSE"
-
-    t2 = MagicMock(spec=Transaction)
-    t2.montant = 30.0
-    t2.type = "DEPENSE"
-
-
-    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_budget
     
     def query_side_effect(model):
         query_mock = MagicMock()
-        if model == Budget:
+        if model is Budget:
             query_mock.filter.return_value.first.return_value = mock_budget
-        elif model == Transaction:
-            query_mock.filter.return_value.all.return_value = [t1, t2]
+        else:
+            query_mock.filter.return_value.scalar.return_value = 70.0
         return query_mock
     
     mock_db_session.query.side_effect = query_side_effect
@@ -42,9 +30,9 @@ def test_get_budget_status_nominal(mock_db_session, mock_budget):
     assert isinstance(resultat, BudgetStatus)
     assert resultat.id == 1
     assert resultat.montant_fixe == 100.0
-    assert resultat.montant_depense == 50.0  # 20 + 30
-    assert resultat.montant_restant == 50.0  # 100 - 50
-    assert resultat.pourcentage_consomme == 50.0 # (50/100)*100
+    assert resultat.montant_depense == 70
+    assert resultat.montant_restant == 30
+    assert resultat.pourcentage_consomme == 70
     assert resultat.est_depasse is False
 
 def test_get_budget_status_not_found(mock_db_session):
@@ -62,19 +50,15 @@ def test_get_budget_status_overdraft(mock_db_session, mock_budget):
     Attendu : Restant -20€, Dépassement détecté.
     """
     service = BudgetService(mock_db_session)
-    
-    t1 = MagicMock(spec=Transaction)
-    t1.montant = 120.0
-    t1.type = "DEPENSE"
-    
+        
     def query_side_effect(model):
             query_mock = MagicMock()
             query_mock.filter.return_value = query_mock 
             
-            if model == Budget:
+            if model is Budget:
                 query_mock.first.return_value = mock_budget
-            elif model == Transaction:
-                query_mock.all.return_value = [t1]
+            else:
+                query_mock.filter.return_value.scalar.return_value = 120.0
             return query_mock
 
     mock_db_session.query.side_effect = query_side_effect

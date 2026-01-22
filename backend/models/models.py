@@ -51,4 +51,4 @@ class Budget(Base):
     
     categorie_id = Column(Integer, ForeignKey('categorie.id'), nullable=False)
 
-    utilisateur_id = Column(Integer, ForeignKey('utilisateur.id'), nullable=False)
+    utilisateur_id = Column(Integer, nullable=True)
