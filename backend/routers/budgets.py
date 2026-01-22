@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import date
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
@@ -46,3 +47,24 @@ def get_budget_status(budget_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error")
+    
+@router.get("/", response_model=list[BudgetStatus])
+def get_budgets(
+    categorie_id: int | None = Query(None, description="Filtrer par catégorie"),
+    debut: date | None = Query(None, description="Date de début de période"),
+    fin: date | None = Query(None, description="Date de fin de période"),
+    skip: int = Query(0, ge=0, description="Nombre d'éléments à sauter (pagination)"),
+    limit: int = Query(100, ge=1, le=1000, description="Nombre d'éléments à récupérer"),
+    db: Session = Depends(get_db)
+):
+    """Récupère la liste des budgets enrichis (statuts calculés)."""
+    service = BudgetService(db)
+    
+    budgets = service.get_budgets(
+        categorie_id=categorie_id,
+        debut_periode=debut,
+        fin_periode=fin,
+        skip=skip,
+        limit=limit
+    )
+    return budgets
