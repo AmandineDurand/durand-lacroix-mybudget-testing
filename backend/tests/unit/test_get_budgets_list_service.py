@@ -28,7 +28,7 @@ def test_get_budgets_list_filters(mock_db_session):
 
     assert isinstance(result, list)
     assert len(result) == 1
-    assert result[0].id == 10
+    assert result[0].id == 10 #type: ignore
     
     mock_db_session.query.assert_called_with(Budget)
     query_mock.all.assert_called_once()

@@ -84,3 +84,20 @@ class BudgetService:
             pourcentage_consomme=pourcentage,
             est_depasse=est_depasse  #type: ignore
         )
+    
+    def get_budgets(self, categorie_id: int | None = None, debut_periode: date | None = None, fin_periode: date | None = None) -> list[Budget]:
+        """
+        Récupère la liste des budgets, avec filtres optionnels.
+        """
+        query = self.db.query(Budget)
+
+        if categorie_id is not None:
+            query = query.filter(Budget.categorie_id == categorie_id)
+
+        if debut_periode and fin_periode:
+            query = query.filter(
+                Budget.debut_periode <= fin_periode,
+                Budget.fin_periode >= debut_periode
+            )
+            
+        return query.all()
