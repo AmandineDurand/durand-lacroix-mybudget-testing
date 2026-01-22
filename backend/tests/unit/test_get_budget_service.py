@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from datetime import date, datetime
 from scripts.saisie_budget import BudgetService
-from models.models import Budget, Transaction
+from models.models import Budget, BudgetNotFoundError
 from schemas.budget import BudgetStatus
 
 def test_get_budget_status_nominal(mock_db_session, mock_budget):
@@ -36,12 +36,12 @@ def test_get_budget_status_nominal(mock_db_session, mock_budget):
     assert resultat.est_depasse is False
 
 def test_get_budget_status_not_found(mock_db_session):
-    """Doit lever une ValueError si le budget n'existe pas"""
+    """Doit lever une BudgetAlreadyExistsError si le budget n'existe pas"""
     service = BudgetService(mock_db_session)
     
     mock_db_session.query.return_value.filter.return_value.first.return_value = None
 
-    with pytest.raises(ValueError, match="n'existe pas"):
+    with pytest.raises(BudgetNotFoundError, match="n'existe pas"):
         service.get_budget_status(999)
 
 def test_get_budget_status_overdraft(mock_db_session, mock_budget):

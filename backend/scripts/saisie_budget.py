@@ -1,7 +1,7 @@
 from datetime import date
 from sqlalchemy import func, cast, and_, Date
 from sqlalchemy.orm import Session
-from models.models import Budget, Categorie, BudgetAlreadyExistsError, Transaction
+from models.models import Budget, Categorie, BudgetAlreadyExistsError, Transaction, BudgetNotFoundError
 from schemas.budget import BudgetStatus
 
 
@@ -51,7 +51,7 @@ class BudgetService:
         budget = self.db.query(Budget).filter(Budget.id == budget_id).first()
 
         if not budget:
-            raise ValueError(f"Le budget {budget_id} n'existe pas")
+            raise BudgetNotFoundError(f"Le budget {budget_id} n'existe pas")
 
         total_depense = self.db.query(func.sum(Transaction.montant)).filter(
             Transaction.categorie_id == budget.categorie_id,
