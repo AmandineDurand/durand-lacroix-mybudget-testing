@@ -92,3 +92,25 @@ def test_get_budgets_unknown_category(mock_db_session):
 
     with pytest.raises(ValueError, match="Catégorie introuvable"):
         service.get_budgets(categorie_id=unknown_cat_id)
+
+def test_get_budgets_pagination(mock_db_session):
+    """Vérifie que la pagination (skip/limit) est bien appliquée à la requête.
+    """
+    service = BudgetService(mock_db_session)
+    
+    skip_val = 10
+    limit_val = 5
+    
+    query_mock = MagicMock()
+    mock_db_session.query.return_value = query_mock
+    query_mock.filter.return_value = query_mock
+    
+
+    query_mock.offset.return_value = query_mock
+    query_mock.limit.return_value = query_mock
+    query_mock.all.return_value = []
+
+    service.get_budgets(skip=skip_val, limit=limit_val)
+    
+    query_mock.offset.assert_called_with(skip_val)
+    query_mock.limit.assert_called_with(limit_val)
