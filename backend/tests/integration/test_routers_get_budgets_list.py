@@ -48,3 +48,14 @@ def test_get_budgets_category_not_found_404(client, mock_db_session):
 
     assert response.status_code == 404
     assert "introuvable" in response.json()["detail"]
+
+def test_get_budgets_inverted_dates_422(client):
+    """
+    Test 422 : Dates inversées (Début > Fin) qui doit être géré par une validation Pydantic (Unprocessable Entity).
+    """
+    debut = "2026-02-01"
+    fin = "2026-01-01"
+
+    response = client.get(f"/api/budgets/?debut={debut}&fin={fin}")
+
+    assert response.status_code == 422
