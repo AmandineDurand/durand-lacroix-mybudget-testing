@@ -69,3 +69,12 @@ def test_get_budgets_generic_400(client, mock_db_session):
 
     assert response.status_code == 400
     assert "Erreur métier" in response.json()["detail"]
+
+def test_get_budgets_internal_error_500(client, mock_db_session):
+    """Test 500 : Crash technique  """
+    mock_db_session.query.side_effect = Exception("Crash Database")
+
+    response = client.get("/api/budgets/")
+
+    assert response.status_code == 500
+    assert "Internal Server Error" in response.json()["detail"]
