@@ -34,3 +34,17 @@ def test_get_budgets_route(client, mock_db_session, mock_budget):
     assert budget_recu["pourcentage_consomme"] == 50.0
     
     query_mock.limit.assert_called_with(5)
+
+def test_get_budgets_category_not_found_404(client, mock_db_session):
+    """Test 404 : Si la catégorie demandée n'existe pas."""
+    cat_id = 999
+    
+    query_mock = MagicMock()
+    mock_db_session.query.return_value = query_mock
+
+    query_mock.filter.return_value.first.return_value = None
+
+    response = client.get(f"/api/budgets/?categorie_id={cat_id}")
+
+    assert response.status_code == 404
+    assert "introuvable" in response.json()["detail"]
