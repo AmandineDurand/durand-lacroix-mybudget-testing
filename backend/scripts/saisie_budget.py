@@ -1,7 +1,7 @@
 from datetime import date
 from sqlalchemy import func, cast, and_, Date
 from sqlalchemy.orm import Session
-from models.models import Budget, Categorie, BudgetAlreadyExistsError, Transaction, BudgetNotFoundError
+from models.models import Budget, Categorie, BudgetAlreadyExistsError, Transaction, BudgetNotFoundError, CategorieNotFoundError
 from schemas.budget import BudgetStatus
 
 
@@ -110,7 +110,7 @@ class BudgetService:
         if categorie_id is not None:
             categorie_existe = self.db.query(Categorie).filter(Categorie.id == categorie_id).first()
             if not categorie_existe:
-                raise ValueError(f"Catégorie introuvable (ID: {categorie_id})")
+                raise CategorieNotFoundError(f"Catégorie introuvable (ID: {categorie_id})")
             query = query.filter(Budget.categorie_id == categorie_id)
 
         if debut_periode:
