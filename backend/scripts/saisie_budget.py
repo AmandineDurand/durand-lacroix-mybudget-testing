@@ -64,7 +64,9 @@ class BudgetService:
         if total_depense is None:
             total_depense = 0.0
 
-        restant = budget.montant_fixe - total_depense
+        total_depense = round(total_depense, 2)
+
+        restant = round(budget.montant_fixe - total_depense, 2) #type:ignore
         
         pourcentage = 0.0
         if budget.montant_fixe > 0: #type: ignore
@@ -129,14 +131,14 @@ class BudgetService:
         budget_status_list = []
         for budget_obj, total_depense in results:
             
-            # Calculs métier
-            restant = budget_obj.montant_fixe - total_depense
+            total_depense = round(total_depense, 2)
+            restant = round(budget_obj.montant_fixe - total_depense, 2)
             
             pourcentage = 0.0
             if budget_obj.montant_fixe > 0:
                 pourcentage = round((total_depense / budget_obj.montant_fixe) * 100, 2)
             
-            est_depasse = round(restant, 2) < 0
+            est_depasse = restant < 0
 
             # Création de l'objet de réponse enrichi
             status_obj = BudgetStatus(
