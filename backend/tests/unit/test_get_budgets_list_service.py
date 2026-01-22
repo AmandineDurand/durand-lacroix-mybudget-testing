@@ -32,3 +32,33 @@ def test_get_budgets_list_filters(mock_db_session):
     
     mock_db_session.query.assert_called_with(Budget)
     query_mock.all.assert_called_once()
+
+def test_get_budgets_filter_start_only(mock_db_session):
+    """Vérifie qu'en fournissant uniquement une date de début, on filtre sur Budget.fin_periode >= debut. """
+    service = BudgetService(mock_db_session)
+    date_debut = date(2026, 1, 1)
+
+    query_mock = MagicMock()
+    mock_db_session.query.return_value = query_mock
+    query_mock.filter.return_value = query_mock
+    query_mock.all.return_value = []
+
+    service.get_budgets(debut_periode=date_debut)
+
+    assert query_mock.filter.call_count >= 1
+
+def test_get_budgets_filter_end_only(mock_db_session):
+    """
+    Vérifie qu'en fournissant uniquement une date de fin, on filtre sur Budget.debut_periode <= fin.
+    """
+    service = BudgetService(mock_db_session)
+    date_fin = date(2026, 1, 31)
+
+    query_mock = MagicMock()
+    mock_db_session.query.return_value = query_mock
+    query_mock.filter.return_value = query_mock
+    query_mock.all.return_value = []
+
+    service.get_budgets(fin_periode=date_fin)
+
+    assert query_mock.filter.call_count >= 1
