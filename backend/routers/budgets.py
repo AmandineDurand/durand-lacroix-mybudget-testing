@@ -44,3 +44,5 @@ def get_budget_status(budget_id: int, db: Session = Depends(get_db)):
         return budget_status
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error")
