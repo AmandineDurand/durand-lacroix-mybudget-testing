@@ -101,9 +101,9 @@ class BudgetService:
             query = query.filter(Budget.categorie_id == categorie_id)
 
         if debut_periode:
-            query = query.filter(Budget.fin_periode >= debut_periode)
+            query = query.filter(cast(Budget.fin_periode, Date) >= debut_periode)
 
         if fin_periode:
-            query = query.filter(Budget.debut_periode <= fin_periode)
+            query = query.filter(cast(Budget.debut_periode, Date) <= fin_periode)
             
         return query.all()
