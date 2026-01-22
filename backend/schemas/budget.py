@@ -28,3 +28,16 @@ class BudgetStatus(BudgetRead):
     montant_restant: float
     pourcentage_consomme: float
     est_depasse: bool
+
+class BudgetFilterParams(BaseModel):
+    categorie_id: int | None = Field(None, description="Filtrer par catégorie")
+    debut: date | None = Field(None, description="Date de début")
+    fin: date | None = Field(None, description="Date de fin")
+    skip: int = Field(0, ge=0, description="Pagination skip")
+    limit: int = Field(100, ge=1, le=1000, description="Pagination limit")
+
+    @model_validator(mode='after')
+    def check_dates(self):
+        if self.debut and self.fin and self.debut > self.fin:
+            raise ValueError("La date de début doit être antérieure à la date de fin")
+        return self
