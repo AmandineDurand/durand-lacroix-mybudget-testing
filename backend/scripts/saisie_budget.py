@@ -1,4 +1,5 @@
 from datetime import date
+from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import Session
 from models.models import Budget, Categorie, BudgetAlreadyExistsError, Transaction
 from schemas.budget import BudgetStatus
@@ -52,14 +53,17 @@ class BudgetService:
         if not budget:
             raise ValueError(f"Le budget {budget_id} n'existe pas")
 
-        transactions = self.db.query(Transaction).filter(
+        total_depense = self.db.query(func.sum(Transaction.montant)).filter(
             Transaction.categorie_id == budget.categorie_id,
-            Transaction.date >= budget.debut_periode,
-            Transaction.date <= budget.fin_periode,
+            # Cast du DateTime en Date pour inclure toute la journée
+            cast(Transaction.date, Date) >= budget.debut_periode,
+            cast(Transaction.date, Date) <= budget.fin_periode,
             Transaction.type == "DEPENSE"
-        ).all()
+        ).scalar()
 
-        total_depense = sum(t.montant for t in transactions)
+        if total_depense is None:
+            total_depense = 0.0
+
         restant = budget.montant_fixe - total_depense
         
         pourcentage = 0.0
