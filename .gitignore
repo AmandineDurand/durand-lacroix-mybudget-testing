@@ -10,7 +10,9 @@ pgadmin_data/
 
 __pycache__/
 ./pytest_cache/
+.pytest_cache/
 .venv
+venv/
 
 .coverage
 
