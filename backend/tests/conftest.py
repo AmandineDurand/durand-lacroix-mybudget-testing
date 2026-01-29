@@ -13,7 +13,7 @@ from models.models import Transaction, Budget, Categorie
 # --- FIXTURES DE DONNÉES (DATA OBJECTS) ---
 
 @pytest.fixture
-def mock_categorie():
+def mock_category():
     """Crée un faux objet Categorie basé sur le modèle SQLAlchemy"""
     # On utilise un MagicMock qui imite la structure de l'objet Categorie
     cat = MagicMock(spec=Categorie)
@@ -23,7 +23,7 @@ def mock_categorie():
     return cat
 
 @pytest.fixture
-def mock_transaction():
+def mock_transaction(mock_category):
     """Crée un faux objet Transaction basé sur le modèle SQLAlchemy"""
     transaction = MagicMock(spec=Transaction)
     transaction.id = 1
@@ -31,7 +31,7 @@ def mock_transaction():
     transaction.type = "DEPENSE"
     transaction.date = datetime(2026, 1, 5)
     transaction.categorie_id = 1
-    transaction.categorie_obj = mock_categorie
+    transaction.categorie_obj = mock_category
     return transaction
 
 @pytest.fixture
@@ -61,7 +61,7 @@ def mock_category_list():
     return [c1, c2]
 
 @pytest.fixture
-def mock_transaction_list(mock_categorie):
+def mock_transaction_list(mock_category):
     """Retourne une liste de fausses transactions pour les tests d'agrégation"""
     t1 = MagicMock(spec=Transaction)
     t1.id = 1
@@ -69,7 +69,7 @@ def mock_transaction_list(mock_categorie):
     t1.type = "DEPENSE"
     t1.date = datetime(2026, 1, 5)
     t1.categorie_id = 1
-    t1.categorie_obj = mock_categorie
+    t1.categorie_obj = mock_category
 
     t2 = MagicMock(spec=Transaction)
     t2.id = 2
@@ -77,7 +77,7 @@ def mock_transaction_list(mock_categorie):
     t2.type = "REVENU"
     t2.date = datetime(2026, 1, 15)
     t2.categorie_id = 1
-    t2.categorie_obj = mock_categorie
+    t2.categorie_obj = mock_category
 
     t3 = MagicMock(spec=Transaction)
     t3.id = 3
@@ -85,7 +85,7 @@ def mock_transaction_list(mock_categorie):
     t3.type = "DEPENSE"
     t3.date = datetime(2025, 12, 31) # Hors période
     t3.categorie_id = 1
-    t3.categorie_obj = mock_categorie
+    t3.categorie_obj = mock_category
     
     return [t1, t2, t3]
 
@@ -113,6 +113,14 @@ def mock_db_session():
     session.refresh.side_effect = side_effect_refresh
 
     return session
+
+@pytest.fixture
+def mock_refresh(mock_category):
+    """Mock de la méthode refresh de SQLAlchemy"""
+    def _refresh(obj):
+        obj.id = 1
+        obj.categorie_obj = mock_category
+    return _refresh
 
 @pytest.fixture
 def client(mock_db_session):
