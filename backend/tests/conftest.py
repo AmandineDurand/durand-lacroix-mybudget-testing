@@ -20,6 +20,7 @@ def mock_category():
     cat.id = 1
     cat.nom = "Alimentation"
     cat.icone = "🍔"
+    cat._sa_instance_state = MagicMock()
     return cat
 
 @pytest.fixture
