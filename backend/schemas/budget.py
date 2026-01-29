@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from datetime import date
 
 class BudgetBase(BaseModel):
@@ -17,11 +17,15 @@ class BudgetBase(BaseModel):
 class BudgetCreate(BudgetBase):
     pass
 
+# class BudgetRead(BudgetBase):
+#     id: int
+
+#     class Config:
+#         from_attributes = True
+
 class BudgetRead(BudgetBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class BudgetStatus(BudgetRead):
     montant_depense: float

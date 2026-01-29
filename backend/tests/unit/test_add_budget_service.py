@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from scripts.saisie_budget import BudgetService
 from models.models import Budget, Categorie, BudgetAlreadyExistsError
 
-def test_definir_budget_valid(mock_db_session, mock_categorie):
+def test_definir_budget_valid(mock_db_session, mock_category):
     """
     Teste la création réussie d'un budget pour une catégorie et une période données.
     """
@@ -18,7 +18,7 @@ def test_definir_budget_valid(mock_db_session, mock_categorie):
     def fake_query_valid(model):
         q = MagicMock()
         if model is Categorie:
-            q.filter.return_value.first.return_value = mock_categorie
+            q.filter.return_value.first.return_value = mock_category
         else:
             q.filter.return_value.first.return_value = None
         return q
@@ -84,7 +84,7 @@ def test_definir_budget_categorie_inexistante(mock_db_session):
 
     assert "La catégorie avec l'ID 999 n'existe pas" in str(excinfo.value)
 
-def test_definir_budget_doublon(mock_db_session, mock_categorie):
+def test_definir_budget_doublon(mock_db_session, mock_category):
     """Vérifie qu'on ne peut pas créer deux fois exactement le même budget."""
     service = BudgetService(mock_db_session)
     debut = date(2026, 1, 1)
@@ -93,7 +93,7 @@ def test_definir_budget_doublon(mock_db_session, mock_categorie):
     def fake_query_dup(model):
         q = MagicMock()
         if model is Categorie:
-            q.filter.return_value.first.return_value = mock_categorie
+            q.filter.return_value.first.return_value = mock_category
         else:
             existing_budget = MagicMock()
             existing_budget.date_debut = debut
@@ -108,7 +108,7 @@ def test_definir_budget_doublon(mock_db_session, mock_categorie):
     
     assert "Un budget existe déjà pour cette catégorie et ces dates exactes" in str(excinfo.value)
 
-def test_definir_budget_chevauchement(mock_db_session, mock_categorie):
+def test_definir_budget_chevauchement(mock_db_session, mock_category):
     """Vérifie qu'on ne peut pas créer un budget qui chevauche une période existante."""
     service = BudgetService(mock_db_session)
     
@@ -118,7 +118,7 @@ def test_definir_budget_chevauchement(mock_db_session, mock_categorie):
     def fake_query_dup(model):
         q = MagicMock()
         if model is Categorie:
-            q.filter.return_value.first.return_value = mock_categorie
+            q.filter.return_value.first.return_value = mock_category
         else:
             existing_budget = MagicMock()
             existing_budget.debut_periode = date(2026, 1, 15)
