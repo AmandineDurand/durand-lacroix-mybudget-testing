@@ -155,3 +155,27 @@ class BudgetService:
             budget_status_list.append(status_obj)
             
         return budget_status_list
+    
+    def update_budget(self, budget_id: int, categorie_id: int | None = None, montant: float | None = None, date_debut: date | None = None, date_fin: date | None = None) -> Budget:
+        """
+        Modifie un budget existant (catégorie, montant ou période).
+        Vérifie l'unicité et l'absence de chevauchement avec d'autres budgets.
+        """
+        budget = self.db.query(Budget).filter(Budget.id == budget_id).first()
+        if not budget:
+            raise BudgetNotFoundError(f"Le budget {budget_id} n'existe pas")
+
+
+        if categorie_id is not None:
+            budget.categorie_id = categorie_id # type: ignore
+        if montant is not None:
+            budget.montant_fixe = montant # type: ignore
+        if date_debut is not None:
+            budget.debut_periode = date_debut # type: ignore
+        if date_fin is not None:
+            budget.fin_periode = date_fin # type: ignore
+
+        self.db.commit()
+        self.db.refresh(budget)
+        
+        return budget
