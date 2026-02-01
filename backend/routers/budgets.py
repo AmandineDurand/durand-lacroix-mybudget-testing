@@ -82,11 +82,26 @@ def update_budget(budget_id: int, budget: BudgetUpdate, db: Session = Depends(ge
     Met à jour un budget existant (Catégorie, Montant ou Période).
     """
     service = BudgetService(db)
-    updated_budget = service.update_budget(
-        budget_id=budget_id,
-        categorie_id=budget.categorie_id,
-        montant=budget.montant_fixe,
-        date_debut=budget.debut_periode,
-        date_fin=budget.fin_periode
-    )
-    return updated_budget
+    try:
+        updated_budget = service.update_budget(
+            budget_id=budget_id,
+            categorie_id=budget.categorie_id,
+            montant=budget.montant_fixe,
+            date_debut=budget.debut_periode,
+            date_fin=budget.fin_periode
+        )
+        return updated_budget
+
+    except BudgetNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except CategorieNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except BudgetAlreadyExistsError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Erreur d'intégrité de la base de donnée")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+    
