@@ -44,7 +44,7 @@ def test_update_budget_success(mock_db_session, mock_budget, mock_categorie):
     mock_db_session.refresh.assert_called_once_with(mock_budget)
 
 def test_update_budget_not_found(mock_db_session):
-    """Test RED : Tentative de mise à jour d'un budget inexistant."""
+    """Test : Tentative de mise à jour d'un budget inexistant."""
     service = BudgetService(mock_db_session)
     mock_db_session.query.return_value.filter.return_value.first.return_value = None
 
@@ -54,7 +54,7 @@ def test_update_budget_not_found(mock_db_session):
     assert "Le budget 999 n'existe pas" in str(exc.value)
 
 def test_update_budget_invalid_dates(mock_db_session, mock_budget):
-    """Test RED : Date de fin antérieure à la date de début."""
+    """Test : Date de fin antérieure à la date de début."""
     service = BudgetService(mock_db_session)
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_budget
 
@@ -67,7 +67,7 @@ def test_update_budget_invalid_dates(mock_db_session, mock_budget):
     assert "La date de fin doit être postérieure à la date de début" in str(exc.value)
 
 def test_update_budget_invalid_amount(mock_db_session, mock_budget):
-    """Test RED : Montant négatif ou nul."""
+    """Test : Montant négatif ou nul."""
     service = BudgetService(mock_db_session)
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_budget
 
@@ -76,7 +76,7 @@ def test_update_budget_invalid_amount(mock_db_session, mock_budget):
     assert "Le montant doit être strictement positif" in str(exc.value)
 
 def test_update_budget_category_not_found(mock_db_session, mock_budget):
-    """Test RED : Changement vers une catégorie inexistante."""
+    """Test : Changement vers une catégorie inexistante."""
     service = BudgetService(mock_db_session)
     
     mock_db_session.query.return_value.filter.return_value.first.side_effect = [mock_budget, None]
@@ -86,7 +86,7 @@ def test_update_budget_category_not_found(mock_db_session, mock_budget):
     assert "La catégorie avec l'ID 999 n'existe pas" in str(exc.value)
 
 def test_update_budget_conflict_overlap(mock_db_session, mock_budget):
-    """Test RED : Modification entraînant un chevauchement avec un AUTRE budget."""
+    """Test : Modification entraînant un chevauchement avec un AUTRE budget."""
     service = BudgetService(mock_db_session)
     
     # Un autre budget existe sur la période cible
@@ -109,3 +109,28 @@ def test_update_budget_conflict_overlap(mock_db_session, mock_budget):
         )
     
     assert "chevauchement" in str(exc.value)
+
+def test_update_budget_partial_amount_only(mock_db_session, mock_budget, mock_categorie):
+    """
+    Test : Mise à jour partielle (uniquement le montant). Vérifie que les dates et la catégorie existantes sont conservées et utilisées pour la validation.
+    """
+    service = BudgetService(mock_db_session)
+    
+    nouveau_montant = 999.0
+
+    mock_query = mock_db_session.query.return_value
+    mock_query.filter.return_value = mock_query
+
+    mock_query.first.side_effect = [
+        mock_budget,
+        mock_categorie,
+        None
+    ]
+
+    updated = service.update_budget(budget_id=1, montant=nouveau_montant)
+
+    assert updated.montant_fixe == nouveau_montant # type: ignore
+    assert updated.categorie_id == 1 # type: ignore
+    assert updated.debut_periode == date(2026, 1, 1) # type: ignore
+    
+    mock_db_session.commit.assert_called_once()
