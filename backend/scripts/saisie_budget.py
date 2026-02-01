@@ -9,29 +9,41 @@ class BudgetService:
     def __init__(self, db: Session):
         self.db = db
 
-    def add_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date) -> Budget:
-
+    def _valider_contraintes_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date, exclude_budget_id: int | None = None):
+        """
+        Valide les règles métiers communes pour l'ajout et la modification.
+        Lève des exceptions si les contraintes ne sont pas respectées.
+        """
         if date_fin < date_debut:
             raise ValueError("La date de fin doit être postérieure à la date de début")
 
-        if montant <= 0 :
+        if montant <= 0:
             raise ValueError("Le montant doit être strictement positif")
         
         categorie = self.db.query(Categorie).filter(Categorie.id == categorie_id).first()
         if not categorie:
-            raise ValueError(f"La catégorie avec l'ID {categorie_id} n'existe pas")
-        
-        budget_conflit = self.db.query(Budget).filter( #couvre unicité et chevauchement
+            raise CategorieNotFoundError(f"La catégorie avec l'ID {categorie_id} n'existe pas")
+
+        query = self.db.query(Budget).filter(
             Budget.categorie_id == categorie_id,
             Budget.debut_periode <= date_fin,
-            Budget.fin_periode>= date_debut
-        ).first()
+            Budget.fin_periode >= date_debut
+        )
+
+        if exclude_budget_id is not None:
+            query = query.filter(Budget.id != exclude_budget_id)
+
+        budget_conflit = query.first()
 
         if budget_conflit:
-            if budget_conflit.date_debut == date_debut and budget_conflit.date_fin == date_fin: #type: ignore
+            if budget_conflit.debut_periode == date_debut and budget_conflit.fin_periode == date_fin: #type: ignore
                  raise BudgetAlreadyExistsError("Un budget existe déjà pour cette catégorie et ces dates exactes")
             
-            raise BudgetAlreadyExistsError(f"Un budget existe déjà sur cette période (chevauchement avec {budget_conflit.date_debut} - {budget_conflit.date_fin})")
+            raise BudgetAlreadyExistsError(f"Un budget existe déjà sur cette période (chevauchement avec {budget_conflit.debut_periode} - {budget_conflit.fin_periode})") #type: ignore
+
+    def add_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date) -> Budget:
+
+        self._valider_contraintes_budget(categorie_id, montant, date_debut, date_fin)
 
         nouveau_budget = Budget(
             categorie_id=categorie_id,
@@ -164,6 +176,14 @@ class BudgetService:
         budget = self.db.query(Budget).filter(Budget.id == budget_id).first()
         if not budget:
             raise BudgetNotFoundError(f"Le budget {budget_id} n'existe pas")
+
+        self._valider_contraintes_budget(
+            categorie_id=categorie_id if categorie_id is not None else budget.categorie_id, # type: ignore
+            montant=montant if montant is not None else budget.montant_fixe, # type: ignore
+            date_debut=date_debut if date_debut is not None else budget.debut_periode, # type: ignore
+            date_fin=date_fin if date_fin is not None else budget.fin_periode, # type: ignore
+            exclude_budget_id=budget_id # type: ignore
+        )
 
 
         if categorie_id is not None:

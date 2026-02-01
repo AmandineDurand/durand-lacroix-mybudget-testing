@@ -26,6 +26,8 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
             date_fin=budget.fin_periode
         )
         return nouveau_budget
+    except CategorieNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except BudgetAlreadyExistsError as e:
