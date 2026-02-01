@@ -134,3 +134,28 @@ def test_update_budget_partial_amount_only(mock_db_session, mock_budget, mock_ca
     assert updated.debut_periode == date(2026, 1, 1) # type: ignore
     
     mock_db_session.commit.assert_called_once()
+
+def test_update_budget_no_changes(mock_db_session, mock_budget):
+    """
+    Test : Tentative de mise à jour sans aucune modification. Doit lever une erreur et ne rien inscrire en base.
+    """
+    service = BudgetService(mock_db_session)
+    
+    mock_query = mock_db_session.query.return_value
+    mock_query.filter.return_value = mock_query
+    mock_query.first.return_value = mock_budget 
+
+    # On appelle update avec les valeurs actuelles du mock_budget
+    with pytest.raises(ValueError) as exc:
+        service.update_budget(
+            budget_id=1,
+            categorie_id=mock_budget.categorie_id,
+            montant=mock_budget.montant_fixe,
+            date_debut=mock_budget.debut_periode,
+            date_fin=mock_budget.fin_periode
+        )
+    
+    assert "Aucune modification apportée" in str(exc.value)
+    
+    mock_db_session.commit.assert_not_called()
+    mock_db_session.refresh.assert_not_called()
