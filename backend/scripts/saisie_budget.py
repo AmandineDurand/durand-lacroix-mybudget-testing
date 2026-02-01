@@ -177,6 +177,12 @@ class BudgetService:
         if not budget:
             raise BudgetNotFoundError(f"Le budget {budget_id} n'existe pas")
 
+        if (categorie_id == budget.categorie_id and 
+            montant == budget.montant_fixe and 
+            date_debut == budget.debut_periode and 
+            date_fin == budget.fin_periode):
+            raise ValueError("Aucune modification apportée au budget")
+
         self._valider_contraintes_budget(
             categorie_id=categorie_id if categorie_id is not None else budget.categorie_id, # type: ignore
             montant=montant if montant is not None else budget.montant_fixe, # type: ignore
