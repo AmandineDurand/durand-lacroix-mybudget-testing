@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ConfigDict
 from datetime import datetime
 
 # Propriétés communes
@@ -28,8 +28,11 @@ class TransactionCreate(TransactionBase):
     pass
 
 # Schéma pour la LECTURE (get)
+# class TransactionRead(TransactionBase):
+#     id: int
+
+#     class Config:
+#         from_attributes = True
 class TransactionRead(TransactionBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
