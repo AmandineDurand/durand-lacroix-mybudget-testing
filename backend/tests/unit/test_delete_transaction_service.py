@@ -22,3 +22,14 @@ def test_delete_transaction_success(mock_db_session, mock_transaction, mock_tran
     mock_db_session.commit.assert_called_once()
     
     assert pytest.approx(total, rel=1e-6) == 25.5
+
+def test_delete_transaction_not_found(mock_db_session):
+    """Si la transaction n'existe pas, une ValueError est levée."""
+    q = MagicMock()
+    q.filter.return_value.first.return_value = None
+    mock_db_session.query.return_value = q
+    
+    service = TransactionService(mock_db_session)
+    
+    with pytest.raises(ValueError, match="Transaction non trouvée"):
+        service.delete_transaction(transaction_id=999)
