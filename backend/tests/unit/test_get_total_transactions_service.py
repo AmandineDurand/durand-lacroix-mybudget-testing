@@ -44,3 +44,10 @@ def test_get_total_with_date_filter(mock_db_session):
     # attendu : +20 -10 = 10
     assert pytest.approx(total, rel=1e-6) == 10.0
     assert mock_db_session.query.return_value.filter.called
+
+def test_get_total_transactions_date_order_invalid_raises(mock_db_session):
+    """Si la date de fin est antérieure à la date de début, on doit lever ValueError."""
+    
+    service = TransactionService(mock_db_session)
+    with pytest.raises(ValueError):
+        service.get_total_transactions(date_debut="2026-02-10", date_fin="2026-01-01")
