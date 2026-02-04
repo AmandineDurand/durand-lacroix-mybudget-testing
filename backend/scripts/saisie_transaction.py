@@ -83,6 +83,12 @@ class TransactionService:
         if montant is not None:
             transaction.montant = montant
         
+        if categorie is not None:
+            new_categorie = self.db.query(Categorie).filter(
+                Categorie.nom.ilike(categorie)
+            ).first()
+            transaction.categorie_id = new_categorie.id
+        
         self.db.commit()
         self.db.refresh(transaction)
         
