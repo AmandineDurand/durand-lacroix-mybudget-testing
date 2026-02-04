@@ -134,3 +134,15 @@ class TestUpdateTransactionService:
         
         with pytest.raises(ValueError, match="Le montant doit être strictement positif"):
             service.update_transaction(transaction_id=1, montant=0)
+
+    def test_update_transaction_type_invalide(self, mock_db_session):
+        """Teste que le service refuse un type invalide"""
+
+        mock_transaction = MagicMock(spec=Transaction)
+        mock_transaction.id = 1
+        
+        mock_db_session.query.return_value.filter.return_value.first.return_value = mock_transaction
+        service = TransactionService(mock_db_session)
+        
+        with pytest.raises(ValueError, match="Le type doit être"):
+            service.update_transaction(transaction_id=1, type="INVALID_TYPE")
