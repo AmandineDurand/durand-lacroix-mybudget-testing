@@ -65,3 +65,25 @@ class TransactionService:
             query = query.filter(Categorie.nom.ilike(categorie_nom))
             
         return query.order_by(Transaction.date.desc()).all()
+    
+    def update_transaction(
+        self,
+        transaction_id: int,
+        montant: float | None = None,
+        libelle: str | None = None,
+        type: str | None = None,
+        date: datetime | None = None,
+        categorie: str | None = None
+    ) -> Transaction:
+
+        transaction = self.db.query(Transaction).filter(
+            Transaction.id == transaction_id
+        ).first()
+        
+        if montant is not None:
+            transaction.montant = montant
+        
+        self.db.commit()
+        self.db.refresh(transaction)
+        
+        return transaction
