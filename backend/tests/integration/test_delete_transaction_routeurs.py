@@ -22,3 +22,16 @@ class TestDeleteTransactionRouter:
         assert response.status_code == 200
         data = response.json()
         assert pytest.approx(data.get("total", 0.0), rel=1e-6) == 25.5
+
+    def test_delete_transaction_endpoint_not_found(self, client, mock_db_session):
+        """Teste que DELETE sur une transaction inexistante retourne 400"""
+        
+        # Simule l'absence de transaction
+        mock_query = MagicMock()
+        mock_query.filter.return_value.first.return_value = None
+        mock_db_session.query.return_value = mock_query
+        
+        response = client.delete("/api/transactions/999")
+        
+        assert response.status_code == 400
+        assert "non trouvée" in response.json()["detail"].lower()
