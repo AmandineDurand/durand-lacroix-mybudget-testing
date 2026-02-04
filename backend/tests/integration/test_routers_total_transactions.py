@@ -47,3 +47,19 @@ class TestTotalTransactionsIntegration:
 
         assert response.status_code == 200
         assert response.json() == {"total": -50.0}
+
+    def test_total_date_debut_after_date_fin(self, client):
+        """Test erreur : date début après date fin"""
+
+        response = client.get(
+            "/api/transactions/total",
+            params={
+                "date_debut": "2026-01-31",
+                "date_fin": "2026-01-01"
+            }
+        )
+
+        assert response.status_code == 400
+        assert "date de début" in response.json()["detail"].lower()
+        assert "après" in response.json()["detail"].lower()
+
