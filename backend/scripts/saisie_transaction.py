@@ -84,6 +84,8 @@ class TransactionService:
             raise ValueError("Transaction non trouvée")
         
         if montant is not None:
+            if montant <= 0:
+                raise ValueError("Le montant doit être strictement positif")
             transaction.montant = montant
         
         if libelle is not None:
