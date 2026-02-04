@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from schemas.transaction import TransactionCreate, TransactionRead
+from schemas.transaction import TransactionCreate, TransactionRead, TransactionUpdate
 from scripts.saisie_transaction import TransactionService
 
 router = APIRouter(
@@ -41,6 +41,27 @@ def list_transactions(
             categorie_nom=categorie
         )
         return transactions
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+
+@router.put("/{transaction_id}", response_model=TransactionRead, status_code=status.HTTP_200_OK)
+def update_transaction(
+    transaction_id: int,
+    transaction_data: TransactionUpdate,
+    service: TransactionService = Depends(get_transaction_service)
+):
+    try:
+        transaction = service.update_transaction(
+            transaction_id=transaction_id,
+            montant=transaction_data.montant,
+            libelle=transaction_data.libelle,
+            type=transaction_data.type,
+            date=transaction_data.date,
+            categorie=transaction_data.categorie
+        )
+        return transaction
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

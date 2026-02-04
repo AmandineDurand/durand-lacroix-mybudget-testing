@@ -36,3 +36,28 @@ class TransactionCreate(TransactionBase):
 class TransactionRead(TransactionBase):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
+class TransactionUpdate(BaseModel):
+    """Schéma pour la MISE À JOUR d'une transaction"""
+    montant: float | None = None
+    libelle: str | None = None
+    type: str | None = None
+    date: datetime | None = None
+    categorie: str | None = None
+
+    @field_validator('montant')
+    @classmethod
+    def montant_positif(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("Le montant doit être strictement positif")
+        return v
+    
+    @field_validator('type')
+    @classmethod
+    def type_valide(cls, v):
+        if v is not None:
+            v_upper = v.upper()
+            if v_upper not in ['REVENU', 'DEPENSE']:
+                raise ValueError("Le type doit être 'REVENU' ou 'DEPENSE'")
+            return v_upper
+        return v
