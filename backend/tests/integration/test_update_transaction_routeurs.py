@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from schemas.transaction import TransactionCreate
 
 class TestUpdateTransactionRouter:
+	
 	def test_update_transaction_endpoint_success(self, client, mock_db_session, mock_transaction):
 		"""Teste que la mise à jour d'une transaction renvoie 200 et les données modifiées."""
 
@@ -39,4 +40,17 @@ class TestUpdateTransactionRouter:
 
 		assert response.status_code == 400
 		assert "non trouvée" in response.json()["detail"].lower()
+
+	def test_update_transaction_endpoint_montant_negatif(self, client):
+		"""Teste que PUT avec montant négatif retourne 422 (validation Pydantic)"""
+
+		payload = {"montant": -10.0}
+		response = client.put("/api/transactions/1", json=payload)
+
+		assert response.status_code == 422
+		errors = response.json().get("detail", [])
+		assert any(
+			"montant" in str(err.get("loc", [])) or "Le montant doit" in err.get("msg", "")
+			for err in errors
+		)
 
