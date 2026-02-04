@@ -171,6 +171,22 @@ class TransactionService:
 
         query = self.db.query(Transaction).join(Categorie)
 
+        # Appliquer filtres de date
+        if date_debut:
+            try:
+                dt_debut = datetime.fromisoformat(date_debut)
+                query = query.filter(Transaction.date >= dt_debut)
+            except ValueError:
+                raise ValueError("Format de date de début invalide")
+
+        if date_fin:
+            try:
+                dt_fin = datetime.fromisoformat(date_fin)
+                dt_fin = dt_fin.replace(hour=23, minute=59, second=59)
+                query = query.filter(Transaction.date <= dt_fin)
+            except ValueError:
+                raise ValueError("Format de date de fin invalide")
+
         transactions = query.all()
 
         total = 0.0
@@ -184,10 +200,6 @@ class TransactionService:
             if ttype == 'DEPENSE':
                 total -= montant
             else:
-                # par défaut on traite comme revenu
                 total += montant
 
-        try:
-            return float(total)
-        except Exception:
-            return 0.0
+        return float(total)
