@@ -23,3 +23,27 @@ class TestTotalTransactionsIntegration:
 
         assert response.status_code == 200
         assert response.json() == {"total": 50.0}
+
+    def test_total_with_valid_filters(self, client, mock_db_session, mock_category):
+        """Test nominal : total avec plage de dates et catégorie valides"""
+
+        t1 = MagicMock(spec=Transaction); t1.montant = 100.0; t1.type = "DEPENSE"; t1.date = datetime(2026, 1, 15); t1.categorie_obj = mock_category
+        t2 = MagicMock(spec=Transaction); t2.montant = 50.0; t2.type = "REVENU"; t2.date = datetime(2026, 1, 20); t2.categorie_obj = mock_category
+
+        mock_query = MagicMock()
+        mock_query.filter.return_value = mock_query
+        mock_query.join.return_value = mock_query
+        mock_query.all.return_value = [t1, t2]
+        mock_db_session.query.return_value = mock_query
+
+        response = client.get(
+            "/api/transactions/total",
+            params={
+                "date_debut": "2026-01-01",
+                "date_fin": "2026-01-31",
+                "categorie": "Alimentation"
+            }
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"total": -50.0}
