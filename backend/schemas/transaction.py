@@ -55,9 +55,7 @@ class TransactionUpdate(BaseModel):
     @field_validator('type')
     @classmethod
     def type_valide(cls, v):
+        # Délègue la validation au service pour retourner ValueError
         if v is not None:
-            v_upper = v.upper()
-            if v_upper not in ['REVENU', 'DEPENSE']:
-                raise ValueError("Le type doit être 'REVENU' ou 'DEPENSE'")
-            return v_upper
+            return v.upper()
         return v
