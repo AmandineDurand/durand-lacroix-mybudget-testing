@@ -112,6 +112,7 @@ class TransactionService:
         
         self.db.commit()
         self.db.refresh(transaction)
+
         try:
             if getattr(transaction, 'categorie_obj', None) is not None:
                 transaction.categorie = transaction.categorie_obj.nom
@@ -119,5 +120,39 @@ class TransactionService:
                 transaction.categorie = None
         except Exception:
             transaction.categorie = str(getattr(transaction, 'categorie', None))
+
+        try:
+            if getattr(transaction, 'id', None) is not None:
+                transaction.id = int(transaction.id)
+        except Exception:
+            pass
+
+        try:
+            if getattr(transaction, 'montant', None) is not None:
+                transaction.montant = float(transaction.montant)
+        except Exception:
+            pass
+
+        try:
+            if getattr(transaction, 'libelle', None) is not None:
+                transaction.libelle = str(transaction.libelle)
+        except Exception:
+            transaction.libelle = None
+
+        try:
+            if getattr(transaction, 'type', None) is not None:
+                transaction.type = str(transaction.type)
+        except Exception:
+            transaction.type = None
+
+        try:
+            if getattr(transaction, 'date', None) is not None:
+                if not isinstance(transaction.date, datetime):
+                    try:
+                        transaction.date = datetime.fromisoformat(str(transaction.date))
+                    except Exception:
+                        transaction.date = str(transaction.date)
+        except Exception:
+            transaction.date = None
         
         return transaction
