@@ -205,6 +205,10 @@ class TransactionService:
         if dt_fin:
             query = query.filter(Transaction.date <= dt_fin)
 
+        # Filtre par catégorie si fourni
+        if categorie_nom:
+            query = query.filter(Categorie.nom.ilike(categorie_nom))
+
         transactions = query.all()
 
         total = 0.0
