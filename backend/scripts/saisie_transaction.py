@@ -44,23 +44,32 @@ class TransactionService:
     ) -> list[Transaction]:
 
         query = self.db.query(Transaction).join(Categorie)
-        
+        # Validation et application des dates (assure debut <= fin si les deux fournis)
+        dt_debut = None
+        dt_fin = None
+
         if date_debut:
             try:
                 dt_debut = datetime.fromisoformat(date_debut)
-                query = query.filter(Transaction.date >= dt_debut)
             except ValueError:
                 raise ValueError("Format de date de début invalide")
-                
+
         if date_fin:
             try:
                 dt_fin = datetime.fromisoformat(date_fin)
-                # on règle la fin de journée pour inclure les transactions de la dite journée
                 dt_fin = dt_fin.replace(hour=23, minute=59, second=59)
-                query = query.filter(Transaction.date <= dt_fin)
             except ValueError:
                 raise ValueError("Format de date de fin invalide")
-        
+
+        if dt_debut and dt_fin and dt_debut > dt_fin:
+            raise ValueError("La date de début ne peut pas être après la date de fin")
+
+        if dt_debut:
+            query = query.filter(Transaction.date >= dt_debut)
+
+        if dt_fin:
+            query = query.filter(Transaction.date <= dt_fin)
+
         if categorie_nom:
             query = query.filter(Categorie.nom.ilike(categorie_nom))
             
@@ -171,11 +180,12 @@ class TransactionService:
 
         query = self.db.query(Transaction).join(Categorie)
 
-        # Appliquer filtres de date
+        dt_debut = None
+        dt_fin = None
+
         if date_debut:
             try:
                 dt_debut = datetime.fromisoformat(date_debut)
-                query = query.filter(Transaction.date >= dt_debut)
             except ValueError:
                 raise ValueError("Format de date de début invalide")
 
@@ -183,9 +193,17 @@ class TransactionService:
             try:
                 dt_fin = datetime.fromisoformat(date_fin)
                 dt_fin = dt_fin.replace(hour=23, minute=59, second=59)
-                query = query.filter(Transaction.date <= dt_fin)
             except ValueError:
                 raise ValueError("Format de date de fin invalide")
+
+        if dt_debut and dt_fin and dt_debut > dt_fin:
+            raise ValueError("La date de début ne peut pas être après la date de fin")
+
+        if dt_debut:
+            query = query.filter(Transaction.date >= dt_debut)
+
+        if dt_fin:
+            query = query.filter(Transaction.date <= dt_fin)
 
         transactions = query.all()
 
