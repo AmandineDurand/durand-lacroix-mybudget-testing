@@ -121,3 +121,16 @@ class TestUpdateTransactionService:
         
         with pytest.raises(ValueError, match="La catégorie .* n'existe pas"):
             service.update_transaction(transaction_id=1, categorie="InexistantCategory")
+
+    def test_update_transaction_montant_zero(self, mock_db_session):
+        """Teste que le service refuse un montant de zéro"""
+
+        mock_transaction = MagicMock(spec=Transaction)
+        mock_transaction.id = 1
+        mock_transaction.montant = 50.0
+        
+        mock_db_session.query.return_value.filter.return_value.first.return_value = mock_transaction
+        service = TransactionService(mock_db_session)
+        
+        with pytest.raises(ValueError, match="Le montant doit être strictement positif"):
+            service.update_transaction(transaction_id=1, montant=0)
