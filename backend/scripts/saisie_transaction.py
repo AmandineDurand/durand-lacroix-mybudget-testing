@@ -156,3 +156,38 @@ class TransactionService:
             transaction.date = None
         
         return transaction
+
+    def get_total_transactions(
+        self,
+        date_debut: str | None = None,
+        date_fin: str | None = None,
+        categorie_nom: str | None = None
+    ) -> float:
+        """Calcule le total en tenant compte des types:
+        - 'REVENU' ajoute le montant
+        - 'DEPENSE' soustrait le montant
+        Les montants stockés sont supposés positifs.
+        """
+
+        query = self.db.query(Transaction).join(Categorie)
+
+        transactions = query.all()
+
+        total = 0.0
+        for t in transactions:
+            try:
+                montant = float(getattr(t, 'montant', 0) or 0)
+            except Exception:
+                montant = 0.0
+
+            ttype = str(getattr(t, 'type', '')).upper() if getattr(t, 'type', None) is not None else ''
+            if ttype == 'DEPENSE':
+                total -= montant
+            else:
+                # par défaut on traite comme revenu
+                total += montant
+
+        try:
+            return float(total)
+        except Exception:
+            return 0.0
