@@ -1,3 +1,4 @@
+import pytest
 from datetime import datetime
 from unittest.mock import MagicMock
 from models.models import Transaction, Categorie
@@ -6,7 +7,7 @@ from scripts.saisie_transaction import TransactionService
 
 class TestUpdateTransactionService:
     """Tests unitaires du service de modification de transaction"""
-    
+
     def test_update_transaction_montant_valid(self, mock_db_session):
         """Teste que le service peut modifier le montant"""
         
@@ -96,3 +97,12 @@ class TestUpdateTransactionService:
         assert mock_transaction.date == new_date
         assert mock_transaction.categorie_id == 2
         mock_db_session.commit.assert_called_once()
+
+    def test_update_transaction_not_found(self, mock_db_session):
+        """Teste que le service lève une exception si la transaction n'existe pas"""
+
+        mock_db_session.query.return_value.filter.return_value.first.return_value = None
+        service = TransactionService(mock_db_session)
+        
+        with pytest.raises(ValueError, match="Transaction non trouvée"):
+            service.update_transaction(transaction_id=999, montant=100.0)
