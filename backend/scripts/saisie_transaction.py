@@ -83,6 +83,15 @@ class TransactionService:
         if montant is not None:
             transaction.montant = montant
         
+        if libelle is not None:
+            transaction.libelle = libelle
+        
+        if type is not None:
+            transaction.type = type
+        
+        if date is not None:
+            transaction.date = date
+        
         if categorie is not None:
             new_categorie = self.db.query(Categorie).filter(
                 Categorie.nom.ilike(categorie)
