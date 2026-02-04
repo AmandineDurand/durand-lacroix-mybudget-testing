@@ -112,5 +112,12 @@ class TransactionService:
         
         self.db.commit()
         self.db.refresh(transaction)
+        try:
+            if getattr(transaction, 'categorie_obj', None) is not None:
+                transaction.categorie = transaction.categorie_obj.nom
+            else:
+                transaction.categorie = None
+        except Exception:
+            transaction.categorie = str(getattr(transaction, 'categorie', None))
         
         return transaction
