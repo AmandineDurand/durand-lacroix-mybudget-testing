@@ -87,3 +87,31 @@ class TestUpdateTransactionRouter:
 		detail = response.json().get("detail", "").lower()
 		assert "type" in detail or "doit" in detail or "revenu" in detail or "depense" in detail
 
+	def test_update_transaction_modify_multiple_fields(self, client, mock_db_session, mock_transaction):
+		"""Teste que PUT peut modifier plusieurs champs à la fois"""
+
+		# transaction existante retournée par la DB
+		mock_db_session.query.return_value.filter.return_value.first.return_value = mock_transaction
+
+		new_date = "2026-02-01T12:00:00"
+		payload = {
+			"montant": 123.45,
+			"libelle": "Modifié",
+			"type": "REVENU",
+			"date": new_date,
+			"categorie": "Alimentation"
+		}
+
+		response = client.put("/api/transactions/1", json=payload)
+
+		assert response.status_code == 200
+		data = response.json()
+
+		# vérifications minimales
+		assert data["montant"] == 123.45
+		assert data["libelle"] == "Modifié"
+		# type peut être renvoyé en majuscules selon la logique
+		assert data["type"].upper() == "REVENU"
+		# date doit être une chaîne ISO ou None
+		assert isinstance(data.get("date"), (str, type(None)))
+
