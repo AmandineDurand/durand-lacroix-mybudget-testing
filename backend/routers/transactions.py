@@ -52,17 +52,12 @@ def update_transaction(
     transaction_data: TransactionUpdate,
     service: TransactionService = Depends(get_transaction_service)
 ):
-    try:
-        transaction = service.update_transaction(
-            transaction_id=transaction_id,
-            montant=transaction_data.montant,
-            libelle=transaction_data.libelle,
-            type=transaction_data.type,
-            date=transaction_data.date,
-            categorie=transaction_data.categorie
-        )
-        return transaction
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+    transaction = service.update_transaction(
+        transaction_id=transaction_id,
+        montant=transaction_data.montant,
+        libelle=transaction_data.libelle,
+        type=transaction_data.type,
+        date=transaction_data.date,
+        categorie=transaction_data.categorie
+    )
+    return transaction
