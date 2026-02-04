@@ -51,3 +51,23 @@ def test_get_total_transactions_date_order_invalid_raises(mock_db_session):
     service = TransactionService(mock_db_session)
     with pytest.raises(ValueError):
         service.get_total_transactions(date_debut="2026-02-10", date_fin="2026-01-01")
+
+def test_get_total_with_category_filter(mock_db_session):
+
+    t1 = MagicMock(); t1.montant = 15.0; t1.type = "REVENU"; t1.date = None; t1.categorie = "Alimentation"
+    t2 = MagicMock(); t2.montant = 5.0; t2.type = "DEPENSE"; t2.date = None; t2.categorie = "Alimentation"
+    t3 = MagicMock(); t3.montant = 10.5; t3.type = "REVENU"; t3.date = None; t3.categorie = "Transport"
+
+    q = MagicMock()
+    mock_db_session.query.return_value = q
+    q.join.return_value = q
+    q.filter.return_value = q
+
+    q.all.return_value = [t1, t2]
+
+    service = TransactionService(mock_db_session)
+    total = service.get_total_transactions(categorie_nom="Alimentation")
+
+    # attendu : +15 -5 = 10
+    assert pytest.approx(total, rel=1e-6) == 10.0
+    assert mock_db_session.query.return_value.filter.called
