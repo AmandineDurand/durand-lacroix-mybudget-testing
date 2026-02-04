@@ -54,3 +54,23 @@ class TestUpdateTransactionRouter:
 			for err in errors
 		)
 
+	def test_update_transaction_endpoint_categorie_inexistante(self, client, mock_db_session, mock_transaction):
+		"""Teste que PUT avec catégorie inexistante retourne 400"""
+
+		# Le service doit retrouver la transaction existante, puis échouer à trouver la nouvelle catégorie
+		def fake_query(model):
+			q = MagicMock()
+			if model.__name__ == 'Transaction':
+				q.filter.return_value.first.return_value = mock_transaction
+			else:
+				q.filter.return_value.first.return_value = None
+			return q
+
+		mock_db_session.query.side_effect = fake_query
+
+		payload = {"categorie": "Inexistante"}
+		response = client.put("/api/transactions/1", json=payload)
+
+		assert response.status_code == 400
+		assert "n'existe" in response.json()["detail"].lower()
+
