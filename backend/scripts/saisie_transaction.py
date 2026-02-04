@@ -92,7 +92,10 @@ class TransactionService:
             transaction.libelle = libelle
         
         if type is not None:
-            transaction.type = type
+            type_upper = type.upper()
+            if type_upper not in ['REVENU', 'DEPENSE']:
+                raise ValueError("Le type doit être 'REVENU' ou 'DEPENSE'")
+            transaction.type = type_upper
         
         if date is not None:
             transaction.date = date
