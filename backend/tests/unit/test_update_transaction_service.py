@@ -106,3 +106,18 @@ class TestUpdateTransactionService:
         
         with pytest.raises(ValueError, match="Transaction non trouvée"):
             service.update_transaction(transaction_id=999, montant=100.0)
+
+    def test_update_transaction_categorie_not_found(self, mock_db_session):
+        """Teste que le service lève une exception si la nouvelle catégorie n'existe pas"""
+
+        mock_transaction = MagicMock(spec=Transaction)
+        
+        mock_db_session.query.return_value.filter.return_value.first.side_effect = [
+            mock_transaction,
+            None
+        ]
+        
+        service = TransactionService(mock_db_session)
+        
+        with pytest.raises(ValueError, match="La catégorie .* n'existe pas"):
+            service.update_transaction(transaction_id=1, categorie="InexistantCategory")
