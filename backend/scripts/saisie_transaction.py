@@ -99,6 +99,10 @@ class TransactionService:
             new_categorie = self.db.query(Categorie).filter(
                 Categorie.nom.ilike(categorie)
             ).first()
+            
+            if not new_categorie:
+                raise ValueError(f"La catégorie '{categorie}' n'existe pas")
+            
             transaction.categorie_id = new_categorie.id
         
         self.db.commit()
