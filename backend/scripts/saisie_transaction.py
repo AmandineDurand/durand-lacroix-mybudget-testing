@@ -225,3 +225,33 @@ class TransactionService:
                 total += montant
 
         return float(total)
+    
+    def delete_transaction(self, transaction_id: int) -> float:
+        """Supprime une transaction par son id et retourne le nouveau total recalculé."""
+        transaction = self.db.query(Transaction).filter(
+            Transaction.id == transaction_id
+        ).first()
+
+        if not transaction:
+            raise ValueError("Transaction non trouvée")
+
+        self.db.delete(transaction)
+        self.db.commit()
+
+        query = self.db.query(Transaction).join(Categorie)
+        transactions = query.all()
+
+        total = 0.0
+        for t in transactions:
+            try:
+                montant = float(getattr(t, 'montant', 0) or 0)
+            except Exception:
+                montant = 0.0
+
+            ttype = str(getattr(t, 'type', '')).upper() if getattr(t, 'type', None) is not None else ''
+            if ttype == 'DEPENSE':
+                total -= montant
+            else:
+                total += montant
+
+        return float(total)
