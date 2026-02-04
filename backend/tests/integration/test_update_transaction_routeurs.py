@@ -74,3 +74,16 @@ class TestUpdateTransactionRouter:
 		assert response.status_code == 400
 		assert "n'existe" in response.json()["detail"].lower()
 
+	def test_update_transaction_endpoint_type_invalide(self, client, mock_db_session, mock_transaction):
+		"""Teste que PUT avec type invalide retourne 400"""
+
+		# La transaction existe
+		mock_db_session.query.return_value.filter.return_value.first.return_value = mock_transaction
+
+		payload = {"type": "INVALID_TYPE"}
+		response = client.put("/api/transactions/1", json=payload)
+
+		assert response.status_code == 400
+		detail = response.json().get("detail", "").lower()
+		assert "type" in detail or "doit" in detail or "revenu" in detail or "depense" in detail
+
