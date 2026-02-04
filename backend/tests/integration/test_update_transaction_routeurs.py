@@ -115,3 +115,30 @@ class TestUpdateTransactionRouter:
 		# date doit être une chaîne ISO ou None
 		assert isinstance(data.get("date"), (str, type(None)))
 
+	def test_update_transaction_put_empty_body_noop(self, client, mock_db_session, mock_transaction):
+		"""Teste que PUT avec un body vide ne modifie rien et retourne 200"""
+
+		# Arrange: la DB retourne la transaction existante
+		mock_db_session.query.return_value.filter.return_value.first.return_value = mock_transaction
+
+		# s'assurer que la propriété 'categorie' est une chaîne pour la sérialisation
+		if hasattr(mock_transaction, 'categorie_obj') and mock_transaction.categorie_obj:
+			try:
+				mock_transaction.categorie = mock_transaction.categorie_obj.nom
+			except Exception:
+				mock_transaction.categorie = str(mock_transaction.categorie_obj)
+
+		orig_montant = float(mock_transaction.montant)
+		orig_libelle = str(mock_transaction.libelle)
+		orig_type = str(mock_transaction.type)
+
+		# Act: envoi d'un body vide
+		response = client.put("/api/transactions/1", json={})
+
+		# Assert
+		assert response.status_code == 200
+		data = response.json()
+		assert data["montant"] == orig_montant
+		assert data["libelle"] == orig_libelle
+		assert data["type"] == orig_type
+
