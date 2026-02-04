@@ -91,5 +91,10 @@ def delete_transaction(
     transaction_id: int,
     service: TransactionService = Depends(get_transaction_service)
 ):
-    total = service.delete_transaction(transaction_id=transaction_id)
-    return {"total": total}
+    try:
+        total = service.delete_transaction(transaction_id=transaction_id)
+        return {"total": total}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
