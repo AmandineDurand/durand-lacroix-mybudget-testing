@@ -80,6 +80,9 @@ class TransactionService:
             Transaction.id == transaction_id
         ).first()
         
+        if not transaction:
+            raise ValueError("Transaction non trouvée")
+        
         if montant is not None:
             transaction.montant = montant
         
