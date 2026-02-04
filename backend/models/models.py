@@ -43,9 +43,28 @@ class Transaction(Base):
 
     categorie_obj = relationship("Categorie", back_populates="transactions")
 
+    # getter qui renvoie le nom de la catégorie
     @property
     def categorie(self):
+        # si un cache intermédiaire a été défini (par le service), l'utiliser
+        if getattr(self, '_categorie_cache', None) is not None:
+            return self._categorie_cache
         return self.categorie_obj.nom if self.categorie_obj else None
+
+    # setter permettant d'autoriser des assignations sûres (utilisé par le service)
+    @categorie.setter
+    def categorie(self, value):
+        try:
+            if value is None:
+                self._categorie_cache = None
+            elif isinstance(value, str):
+                self._categorie_cache = value
+            elif hasattr(value, 'nom'):
+                self._categorie_cache = value.nom
+            else:
+                self._categorie_cache = str(value)
+        except Exception:
+            self._categorie_cache = None
 
 class Budget(Base):
     __tablename__ = "budget"
