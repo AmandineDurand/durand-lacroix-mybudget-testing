@@ -63,3 +63,21 @@ class TestTotalTransactionsIntegration:
         assert "date de début" in response.json()["detail"].lower()
         assert "après" in response.json()["detail"].lower()
 
+    def test_total_no_transactions(self, client, mock_db_session):
+        """Test limite : aucune transaction trouvée"""
+
+        mock_query = MagicMock()
+        mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = []
+        mock_db_session.query.return_value = mock_query
+
+        response = client.get(
+            "/api/transactions/total",
+            params={
+                "date_debut": "2026-01-01",
+                "date_fin": "2026-01-31"
+            }
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"total": 0.0}
