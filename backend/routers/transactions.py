@@ -66,3 +66,22 @@ def update_transaction(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+    
+@router.get("/total")
+def total_transactions(
+    date_debut: str | None = Query(None, description="Format YYYY-MM-DD"),
+    date_fin: str | None = Query(None, description="Format YYYY-MM-DD"),
+    categorie: str | None = None,
+    service: TransactionService = Depends(get_transaction_service)
+):
+    try:
+        total = service.get_total_transactions(
+            date_debut=date_debut,
+            date_fin=date_fin,
+            categorie_nom=categorie
+        )
+        return {"total": total}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
