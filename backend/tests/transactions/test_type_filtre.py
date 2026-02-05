@@ -54,3 +54,22 @@ def test_get_transactions_with_type():
     # ASSERT
     assert len(result) == 2
     assert all(t.type == "DEPENSE" for t in result)
+
+def test_get_transactions_type_invalide():
+    """Filtre type invalide lève une ValueError"""
+    
+    # Mock DB
+    mock_db = MagicMock()
+    mock_query = MagicMock()
+    mock_join = MagicMock()
+    mock_filter = MagicMock()
+    mock_filter.filter.side_effect = lambda x: mock_filter
+    mock_join.filter.side_effect = lambda x: mock_filter
+    mock_query.join.return_value = mock_join
+    mock_db.query.return_value = mock_query
+    
+    # Test
+    service = TransactionService(mock_db)
+    
+    with pytest.raises(ValueError, match="Le type doit être"):
+        service.get_transactions(type_filtre="INVALID")
