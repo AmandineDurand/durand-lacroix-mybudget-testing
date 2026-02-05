@@ -32,13 +32,15 @@ def list_transactions(
     date_debut: str | None = Query(None, description="Format YYYY-MM-DD"),
     date_fin: str | None = Query(None, description="Format YYYY-MM-DD"),
     categorie: str | None = None,
+    type_filtre: str | None = Query(None, description="REVENU ou DEPENSE"),
     service: TransactionService = Depends(get_transaction_service)
 ):
     try:
         transactions = service.get_transactions(
             date_debut=date_debut, 
             date_fin=date_fin, 
-            categorie_nom=categorie
+            categorie_nom=categorie,
+            type_filtre=type_filtre
         )
         return transactions
     except ValueError as e:
