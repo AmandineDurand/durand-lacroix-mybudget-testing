@@ -145,3 +145,36 @@ def test_list_filter_by_type(client, mock_db_session):
         data = response.json()
         assert len(data) == 1
         assert data[0]["type"] == "REVENU"
+
+def test_total_transactions_with_type_filter(client, mock_db_session):
+        """total_transactions endpoint filtre par type"""
+        
+        transactions = []
+        for montant, type_t in [
+            (100.00, "DEPENSE"),
+            (2500.00, "REVENU")
+        ]:
+            t = MagicMock()
+            t.montant = montant
+            t.type = type_t
+            t.date = datetime(2026, 1, 1)
+            transactions.append(t)
+        
+        depenses = [t for t in transactions if t.type == "DEPENSE"]
+        
+        mock_query = MagicMock()
+        mock_join = MagicMock()
+        
+        def filter_side_effect(condition):
+            return mock_query
+        
+        mock_join.filter.side_effect = filter_side_effect
+        mock_query.join.return_value = mock_join
+        mock_query.all.return_value = depenses
+        mock_db_session.query.return_value = mock_query
+        
+        response = client.get("/api/transactions/total?type_filtre=DEPENSE")
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == -100.0  # DEPENSE = négatif
