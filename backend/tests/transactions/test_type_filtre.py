@@ -110,3 +110,38 @@ def test_get_total_transactions_with_type_filter():
     assert total == -150.0
     with pytest.raises(ValueError, match="Le type doit être"):
         service.get_total_transactions(type_filtre="INVALID")
+
+# ========= API =========
+
+def test_list_filter_by_type(client, mock_db_session):
+        """Filtre par type insensible à la casse : minuscules acceptées"""
+        
+        transactions = []
+        t = MagicMock()
+        t.id = 1
+        t.montant = 2500.00
+        t.libelle = "Salaire"
+        t.type = "REVENU"
+        t.date = datetime(2026, 1, 1)
+        cat_obj = MagicMock()
+        cat_obj.nom = "salaire"
+        t.categorie_obj = cat_obj
+        t.categorie = "salaire"
+        transactions.append(t)
+        
+        mock_query = MagicMock()
+        mock_join = MagicMock()
+        mock_filter = MagicMock()
+        mock_order = MagicMock()
+        mock_order.all.return_value = transactions
+        mock_filter.order_by.return_value = mock_order
+        mock_join.filter.return_value = mock_filter
+        mock_query.join.return_value = mock_join
+        mock_db_session.query.return_value = mock_query
+        
+        response = client.get("/api/transactions?type_filtre=revenu")
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["type"] == "REVENU"
