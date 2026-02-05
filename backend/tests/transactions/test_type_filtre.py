@@ -73,3 +73,38 @@ def test_get_transactions_type_invalide():
     
     with pytest.raises(ValueError, match="Le type doit être"):
         service.get_transactions(type_filtre="INVALID")
+
+def test_get_total_transactions_with_type_filter():
+    """get_total_transactions filtre par type et calcule correctement"""
+    
+    mock_db = MagicMock()
+    
+    transactions = []
+    for montant, type_t in [
+        (100.00, "DEPENSE"),    # -100
+        (2500.00, "REVENU"),    # +2500
+        (50.00, "DEPENSE")      # -50
+    ]:
+        t = MagicMock()
+        t.montant = montant
+        t.type = type_t
+        t.date = datetime(2026, 1, 1)
+        transactions.append(t)
+    
+    depenses = [t for t in transactions if t.type == "DEPENSE"]
+    
+    mock_query = MagicMock()
+    mock_join = MagicMock()
+    
+    def filter_side_effect(condition):
+        return mock_query
+    
+    mock_join.filter.side_effect = filter_side_effect
+    mock_query.join.return_value = mock_join
+    mock_query.all.return_value = depenses
+    mock_db.query.return_value = mock_query
+    
+    service = TransactionService(mock_db)
+    total = service.get_total_transactions(type_filtre="DEPENSE")
+    
+    assert total == -150.0
