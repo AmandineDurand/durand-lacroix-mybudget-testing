@@ -40,7 +40,8 @@ class TransactionService:
         self, 
         date_debut: str | None = None, 
         date_fin: str | None = None, 
-        categorie_nom: str | None = None
+        categorie_nom: str | None = None,
+        type_filtre: str | None = None
     ) -> list[Transaction]:
 
         query = self.db.query(Transaction).join(Categorie)
@@ -72,6 +73,10 @@ class TransactionService:
 
         if categorie_nom:
             query = query.filter(Categorie.nom.ilike(categorie_nom))
+        
+        if type_filtre:
+            type_upper = type_filtre.upper()
+            query = query.filter(Transaction.type == type_upper)
             
         return query.order_by(Transaction.date.desc()).all()
     
