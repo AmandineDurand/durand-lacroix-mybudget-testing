@@ -45,3 +45,10 @@ class BudgetFilterParams(BaseModel):
         if self.debut and self.fin and self.debut > self.fin:
             raise ValueError("La date de début doit être antérieure à la date de fin")
         return self
+
+class BudgetUpdate(BaseModel):
+    """Schéma pour la modification d'un budget (champs optionnels)"""
+    categorie_id: int | None = None
+    montant_fixe: float | None = None
+    debut_periode: date | None = None
+    fin_periode: date | None = None

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
 from scripts.saisie_budget import BudgetService
-from schemas.budget import BudgetCreate, BudgetFilterParams, BudgetRead, BudgetStatus
+from schemas.budget import BudgetCreate, BudgetFilterParams, BudgetRead, BudgetStatus, BudgetUpdate
 from models.models import BudgetAlreadyExistsError, BudgetNotFoundError, CategorieNotFoundError
 
 router = APIRouter(
@@ -26,6 +26,8 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
             date_fin=budget.fin_periode
         )
         return nouveau_budget
+    except CategorieNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except BudgetAlreadyExistsError as e:
@@ -73,3 +75,33 @@ def get_budgets(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error")
+    
+@router.put("/{budget_id}", response_model=BudgetRead)
+def update_budget(budget_id: int, budget: BudgetUpdate, db: Session = Depends(get_db)):
+    """
+    Met à jour un budget existant (Catégorie, Montant ou Période).
+    """
+    service = BudgetService(db)
+    try:
+        updated_budget = service.update_budget(
+            budget_id=budget_id,
+            categorie_id=budget.categorie_id,
+            montant=budget.montant_fixe,
+            date_debut=budget.debut_periode,
+            date_fin=budget.fin_periode
+        )
+        return updated_budget
+
+    except BudgetNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except CategorieNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except BudgetAlreadyExistsError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Erreur d'intégrité de la base de donnée")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+    

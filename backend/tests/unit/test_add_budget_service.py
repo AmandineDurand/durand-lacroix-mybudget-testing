@@ -2,7 +2,7 @@ import pytest
 from datetime import date
 from unittest.mock import MagicMock
 from scripts.saisie_budget import BudgetService
-from models.models import Budget, Categorie, BudgetAlreadyExistsError
+from models.models import Budget, Categorie, BudgetAlreadyExistsError, CategorieNotFoundError
 
 def test_definir_budget_valid(mock_db_session, mock_category):
     """
@@ -79,7 +79,7 @@ def test_definir_budget_categorie_inexistante(mock_db_session):
     # configuration du mock : la requête pour la catégorie renvoie None
     mock_db_session.query.return_value.filter.return_value.first.return_value = None
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(CategorieNotFoundError) as excinfo:
         service.add_budget(999, 500.0, debut, fin) # ID 999 inexistant
 
     assert "La catégorie avec l'ID 999 n'existe pas" in str(excinfo.value)
@@ -96,8 +96,8 @@ def test_definir_budget_doublon(mock_db_session, mock_category):
             q.filter.return_value.first.return_value = mock_category
         else:
             existing_budget = MagicMock()
-            existing_budget.date_debut = debut
-            existing_budget.date_fin = fin
+            existing_budget.debut_periode = debut
+            existing_budget.fin_periode = fin
             q.filter.return_value.first.return_value = existing_budget
         return q
 
