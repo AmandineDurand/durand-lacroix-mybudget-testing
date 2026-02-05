@@ -76,6 +76,8 @@ class TransactionService:
         
         if type_filtre:
             type_upper = type_filtre.upper()
+            if type_upper not in ['REVENU', 'DEPENSE']:
+                raise ValueError("Le type doit être 'REVENU' ou 'DEPENSE'")
             query = query.filter(Transaction.type == type_upper)
             
         return query.order_by(Transaction.date.desc()).all()
