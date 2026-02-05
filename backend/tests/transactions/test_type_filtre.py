@@ -108,3 +108,5 @@ def test_get_total_transactions_with_type_filter():
     total = service.get_total_transactions(type_filtre="DEPENSE")
     
     assert total == -150.0
+    with pytest.raises(ValueError, match="Le type doit être"):
+        service.get_total_transactions(type_filtre="INVALID")
