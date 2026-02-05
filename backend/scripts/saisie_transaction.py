@@ -177,7 +177,8 @@ class TransactionService:
         self,
         date_debut: str | None = None,
         date_fin: str | None = None,
-        categorie_nom: str | None = None
+        categorie_nom: str | None = None,
+        type_filtre: str | None = None
     ) -> float:
         """Calcule le total en tenant compte des types:
         - 'REVENU' ajoute le montant
@@ -215,6 +216,10 @@ class TransactionService:
         # Filtre par catégorie si fourni
         if categorie_nom:
             query = query.filter(Categorie.nom.ilike(categorie_nom))
+
+        if type_filtre:
+            type_upper = type_filtre.upper()
+            query = query.filter(Transaction.type == type_upper)
 
         transactions = query.all()
 
