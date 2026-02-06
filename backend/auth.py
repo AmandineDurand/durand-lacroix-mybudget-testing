@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
+import os
 import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -9,7 +10,7 @@ from database import get_db
 from models.models import User, InvalidCredentialsError, UserAlreadyExistsError, UserNotFoundError
 
 # Configuration de la sécurité
-SECRET_KEY = "your-secret-key-change-in-production"  # TODO: à récupérer depuis une variable d'environnement
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-dev-only-DO-NOT-USE-IN-PROD")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
