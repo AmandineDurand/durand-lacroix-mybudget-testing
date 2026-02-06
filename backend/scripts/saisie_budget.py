@@ -9,10 +9,11 @@ class BudgetService:
     def __init__(self, db: Session):
         self.db = db
 
-    def _valider_contraintes_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date, exclude_budget_id: int | None = None):
+    def _valider_contraintes_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date, exclude_budget_id: int | None = None, user_id: int | None = None):
         """
         Valide les règles métiers communes pour l'ajout et la modification.
         Lève des exceptions si les contraintes ne sont pas respectées.
+        Filters by user_id to allow each user to have the same budget in same dates.
         """
         if date_fin < date_debut:
             raise ValueError("La date de fin doit être postérieure à la date de début")
@@ -30,6 +31,10 @@ class BudgetService:
             Budget.fin_periode >= date_debut
         )
 
+        # Filter by user to allow multi-user isolation
+        if user_id is not None:
+            query = query.filter(Budget.utilisateur_id == user_id)
+
         if exclude_budget_id is not None:
             query = query.filter(Budget.id != exclude_budget_id)
 
@@ -41,16 +46,16 @@ class BudgetService:
             
             raise BudgetAlreadyExistsError(f"Un budget existe déjà sur cette période (chevauchement avec {budget_conflit.debut_periode} - {budget_conflit.fin_periode})") #type: ignore
 
-    def add_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date) -> Budget:
+    def add_budget(self, categorie_id: int, montant: float, date_debut: date, date_fin: date, user_id: int | None = None) -> Budget:
 
-        self._valider_contraintes_budget(categorie_id, montant, date_debut, date_fin)
+        self._valider_contraintes_budget(categorie_id, montant, date_debut, date_fin, user_id=user_id or 1)
 
         nouveau_budget = Budget(
             categorie_id=categorie_id,
             montant_fixe=montant,
             debut_periode=date_debut,
             fin_periode=date_fin,
-            utilisateur_id= 1 #pour future utilisation multi user
+            utilisateur_id=user_id or 1  # Assigner l'utilisateur ou défaut à 1
         )
         
         self.db.add(nouveau_budget)
@@ -99,7 +104,7 @@ class BudgetService:
             est_depasse=est_depasse  #type: ignore
         )
     
-    def get_budgets(self, categorie_id: int | None = None, debut_periode: date | None = None, fin_periode: date | None = None, skip: int = 0, limit: int = 0) -> list[BudgetStatus]:
+    def get_budgets(self, categorie_id: int | None = None, debut_periode: date | None = None, fin_periode: date | None = None, skip: int = 0, limit: int = 0, user_id: int | None = None) -> list[BudgetStatus]:
         """
         Récupère la liste des budgets, avec filtres optionnels.
         """
@@ -132,6 +137,10 @@ class BudgetService:
 
         if fin_periode:
             query = query.filter(cast(Budget.debut_periode, Date) <= fin_periode)
+        
+        # Filtre par utilisateur si fourni
+        if user_id is not None:
+            query = query.filter(Budget.utilisateur_id == user_id)
 
         query = query.group_by(Budget.id)
 
@@ -168,7 +177,7 @@ class BudgetService:
             
         return budget_status_list
     
-    def update_budget(self, budget_id: int, categorie_id: int | None = None, montant: float | None = None, date_debut: date | None = None, date_fin: date | None = None) -> Budget:
+    def update_budget(self, budget_id: int, categorie_id: int | None = None, montant: float | None = None, date_debut: date | None = None, date_fin: date | None = None, user_id: int | None = None) -> Budget:
         """
         Modifie un budget existant (catégorie, montant ou période).
         Vérifie l'unicité et l'absence de chevauchement avec d'autres budgets.
@@ -176,6 +185,10 @@ class BudgetService:
         budget = self.db.query(Budget).filter(Budget.id == budget_id).first()
         if not budget:
             raise BudgetNotFoundError(f"Le budget {budget_id} n'existe pas")
+        
+        # Vérifier que l'utilisateur ne peut modifier que ses propres budgets
+        if user_id is not None and budget.utilisateur_id != user_id:
+            raise ValueError("Vous ne pouvez modifier que vos propres budgets")
 
         if (categorie_id == budget.categorie_id and 
             montant == budget.montant_fixe and 
@@ -188,7 +201,8 @@ class BudgetService:
             montant=montant if montant is not None else budget.montant_fixe, # type: ignore
             date_debut=date_debut if date_debut is not None else budget.debut_periode, # type: ignore
             date_fin=date_fin if date_fin is not None else budget.fin_periode, # type: ignore
-            exclude_budget_id=budget_id # type: ignore
+            exclude_budget_id=budget_id, # type: ignore
+            user_id=user_id or budget.utilisateur_id
         )
 
 

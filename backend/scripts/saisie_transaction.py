@@ -8,7 +8,7 @@ class TransactionService:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_transaction(self, transaction_data: TransactionCreate) -> Transaction:
+    def create_transaction(self, transaction_data: TransactionCreate, user_id: int | None = None) -> Transaction:
         # recherche de la catégorie d'abord
         categorie = self.db.query(Categorie).filter(
             Categorie.nom.ilike(transaction_data.categorie)
@@ -28,7 +28,7 @@ class TransactionService:
             type=transaction_data.type,
             categorie_id=categorie.id,
             date=transaction_data.date,
-            utilisateur_id=1  # 1 pour l'instant, futur multi-utilisateurs
+            utilisateur_id=user_id or 1  # Assigner l'utilisateur ou défaut à 1
         )
         
         self.db.add(db_transaction)
@@ -41,7 +41,8 @@ class TransactionService:
         date_debut: str | None = None, 
         date_fin: str | None = None, 
         categorie_nom: str | None = None,
-        type_filtre: str | None = None
+        type_filtre: str | None = None,
+        user_id: int | None = None
     ) -> list[Transaction]:
 
         query = self.db.query(Transaction).join(Categorie)
@@ -79,6 +80,10 @@ class TransactionService:
             if type_upper not in ['REVENU', 'DEPENSE']:
                 raise ValueError("Le type doit être 'REVENU' ou 'DEPENSE'")
             query = query.filter(Transaction.type == type_upper)
+        
+        # Filtre par utilisateur si fourni
+        if user_id is not None:
+            query = query.filter(Transaction.utilisateur_id == user_id)
             
         return query.order_by(Transaction.date.desc()).all()
     
@@ -89,7 +94,8 @@ class TransactionService:
         libelle: str | None = None,
         type: str | None = None,
         date: datetime | None = None,
-        categorie: str | None = None
+        categorie: str | None = None,
+        user_id: int | None = None
     ) -> Transaction:
 
         transaction = self.db.query(Transaction).filter(
@@ -98,6 +104,10 @@ class TransactionService:
         
         if not transaction:
             raise ValueError("Transaction non trouvée")
+        
+        # Vérifier que l'utilisateur ne peut modifier que ses propres transactions
+        if user_id is not None and transaction.utilisateur_id != user_id:
+            raise ValueError("Vous ne pouvez modifier que vos propres transactions")
         
         if montant is not None:
             if montant <= 0:
@@ -178,7 +188,8 @@ class TransactionService:
         date_debut: str | None = None,
         date_fin: str | None = None,
         categorie_nom: str | None = None,
-        type_filtre: str | None = None
+        type_filtre: str | None = None,
+        user_id: int | None = None
     ) -> float:
         """Calcule le total en tenant compte des types:
         - 'REVENU' ajoute le montant
@@ -222,6 +233,10 @@ class TransactionService:
             if type_upper not in ['REVENU', 'DEPENSE']:
                 raise ValueError("Le type doit être 'REVENU' ou 'DEPENSE'")
             query = query.filter(Transaction.type == type_upper)
+        
+        # Filtre par utilisateur si fourni
+        if user_id is not None:
+            query = query.filter(Transaction.utilisateur_id == user_id)
 
         transactions = query.all()
 
@@ -240,7 +255,7 @@ class TransactionService:
 
         return float(total)
     
-    def delete_transaction(self, transaction_id: int) -> float:
+    def delete_transaction(self, transaction_id: int, user_id: int | None = None) -> float:
         """Supprime une transaction par son id et retourne le nouveau total recalculé."""
         transaction = self.db.query(Transaction).filter(
             Transaction.id == transaction_id
@@ -248,11 +263,20 @@ class TransactionService:
 
         if not transaction:
             raise ValueError("Transaction non trouvée")
+        
+        # Vérifier que l'utilisateur ne peut supprimer que ses propres transactions
+        if user_id is not None and transaction.utilisateur_id != user_id:
+            raise ValueError("Vous ne pouvez supprimer que vos propres transactions")
 
         self.db.delete(transaction)
         self.db.commit()
 
         query = self.db.query(Transaction).join(Categorie)
+        
+        # Si user_id est fourni, filtrer par utilisateur
+        if user_id is not None:
+            query = query.filter(Transaction.utilisateur_id == user_id)
+        
         transactions = query.all()
 
         total = 0.0

@@ -20,7 +20,9 @@ def test_definir_budget_valid(mock_db_session, mock_category):
         if model is Categorie:
             q.filter.return_value.first.return_value = mock_category
         else:
-            q.filter.return_value.first.return_value = None
+            # Support for chained filters: filter().filter().filter().first()
+            q.filter.return_value = q
+            q.first.return_value = None
         return q
 
     mock_db_session.query.side_effect = fake_query_valid
@@ -98,7 +100,9 @@ def test_definir_budget_doublon(mock_db_session, mock_category):
             existing_budget = MagicMock()
             existing_budget.debut_periode = debut
             existing_budget.fin_periode = fin
-            q.filter.return_value.first.return_value = existing_budget
+            # Support for chained filters: filter().filter().filter().first()
+            q.filter.return_value = q
+            q.first.return_value = existing_budget
         return q
 
     mock_db_session.query.side_effect = fake_query_dup
@@ -123,7 +127,9 @@ def test_definir_budget_chevauchement(mock_db_session, mock_category):
             existing_budget = MagicMock()
             existing_budget.debut_periode = date(2026, 1, 15)
             existing_budget.fin_periode = date(2026, 1, 25)
-            q.filter.return_value.first.return_value = existing_budget
+            # Support for chained filters: filter().filter().filter().first()
+            q.filter.return_value = q
+            q.first.return_value = existing_budget
         return q
 
     mock_db_session.query.side_effect = fake_query_dup

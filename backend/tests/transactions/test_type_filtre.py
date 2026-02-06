@@ -135,6 +135,8 @@ def test_list_filter_by_type(client, mock_db_session):
         mock_order = MagicMock()
         mock_order.all.return_value = transactions
         mock_filter.order_by.return_value = mock_order
+        # Make filter chainable - multiple filter() calls should work
+        mock_filter.filter.return_value = mock_filter
         mock_join.filter.return_value = mock_filter
         mock_query.join.return_value = mock_join
         mock_db_session.query.return_value = mock_query
@@ -164,13 +166,23 @@ def test_total_transactions_with_type_filter(client, mock_db_session):
         
         mock_query = MagicMock()
         mock_join = MagicMock()
+        mock_order = MagicMock()
+        mock_order.all.return_value = depenses
         
-        def filter_side_effect(condition):
-            return mock_query
-        
-        mock_join.filter.side_effect = filter_side_effect
+        # Make filter chainable and order_by return mock_order
+        mock_join.filter.return_value = mock_join
+        mock_join.order_by.return_value = mock_order
         mock_query.join.return_value = mock_join
+        
+        # For get_total_transactions, we need different mock behavior
+        # The query chain should be: query(Transaction).join(Categorie).filter(...).all()
+        # without order_by
+        def custom_all():
+            return depenses
+        
+        mock_join.all.return_value = depenses
         mock_query.all.return_value = depenses
+        
         mock_db_session.query.return_value = mock_query
         
         response = client.get("/api/transactions/total?type_filtre=DEPENSE")

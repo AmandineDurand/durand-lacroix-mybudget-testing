@@ -122,6 +122,8 @@ class TestAPI:
         mock_join = MagicMock()
         mock_order = MagicMock()
         mock_order.all.return_value = transactions
+        # Make mock_join chainable - filter() returns itself for chaining
+        mock_join.filter.return_value = mock_join
         mock_join.order_by.return_value = mock_order
         mock_query.join.return_value = mock_join
         mock_db_session.query.return_value = mock_query
@@ -143,6 +145,8 @@ class TestAPI:
         mock_join = MagicMock()
         mock_order = MagicMock()
         mock_order.all.return_value = []
+        # Make mock_join chainable
+        mock_join.filter.return_value = mock_join
         mock_join.order_by.return_value = mock_order
         mock_query.join.return_value = mock_join
         mock_db_session.query.return_value = mock_query
@@ -157,6 +161,8 @@ class TestAPI:
 
         mock_query = MagicMock()
         mock_join = MagicMock()
+        # Make filter() return mock_join so order_by gets called and raises error
+        mock_join.filter.return_value = mock_join
         mock_join.order_by.side_effect = Exception("DB Error")
         mock_query.join.return_value = mock_join
         mock_db_session.query.return_value = mock_query

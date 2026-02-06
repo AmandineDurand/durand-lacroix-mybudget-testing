@@ -14,10 +14,20 @@ def test_create_budget_endpoint_success(client, mock_db_session, mock_category):
         "fin_periode": "2026-01-31"
     }
 
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
-        mock_category,
-        None
-    ]
+    # Handle different queries - Categorie vs Budget
+    def fake_query(model):
+        q = MagicMock()
+        if model is Categorie:
+            # Categorie exists
+            q.filter.return_value.first.return_value = mock_category
+        else:
+            # No existing budget with same dates/category/user
+            q.filter.return_value = q
+            q.first.return_value = None
+        return q
+
+    from models.models import Categorie
+    mock_db_session.query.side_effect = fake_query
 
     response = client.post("/api/budgets/", json=payload)
 
@@ -73,10 +83,18 @@ def test_create_budget_endpoint_internal_other_error(client, mock_db_session, mo
         "fin_periode": "2026-01-31"
     }
 
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
-        mock_category,
-        None
-    ] # Insertion valide
+    # Setup mocks to handle chained filter calls
+    def fake_query(model):
+        q = MagicMock()
+        if hasattr(model, '__name__') and model.__name__ == 'Categorie':
+            q.filter.return_value.first.return_value = mock_category
+        else:
+            # Budget query - make filter chainable
+            q.filter.return_value = q
+            q.first.return_value = None
+        return q
+
+    mock_db_session.query.side_effect = fake_query
     
     # On force le commit() à lever une exception inattendue
     mock_db_session.commit.side_effect = Exception("Crash inattendu de la DB")
@@ -133,11 +151,18 @@ def test_create_budget_integrity_error_race_condition(client, mock_db_session, m
         "fin_periode": "2026-01-31"
     }
 
-    # D'abord, comportement normal,
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
-        mock_category,
-        None 
-    ]
+    # Setup mocks to handle chained filter calls
+    def fake_query(model):
+        q = MagicMock()
+        if hasattr(model, '__name__') and model.__name__ == 'Categorie':
+            q.filter.return_value.first.return_value = mock_category
+        else:
+            # Budget query - make filter chainable
+            q.filter.return_value = q
+            q.first.return_value = None
+        return q
+
+    mock_db_session.query.side_effect = fake_query
 
     # MAIS le commit échoue (Simule la DB qui bloque)
     mock_db_session.commit.side_effect = IntegrityError(None, None, Exception("Unique violation"))
