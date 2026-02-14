@@ -13,6 +13,15 @@ class BudgetNotFoundError(Exception):
 class CategorieNotFoundError(Exception):
     pass
 
+class UserAlreadyExistsError(Exception):
+    pass
+
+class InvalidCredentialsError(Exception):
+    pass
+
+class UserNotFoundError(Exception):
+    pass
+
 # type de transaction
 class TypeTransaction(str, enum.Enum):
     REVENU = "revenu"
@@ -77,3 +86,11 @@ class Budget(Base):
     categorie_id = Column(Integer, ForeignKey('categorie.id'), nullable=False)
 
     utilisateur_id = Column(Integer, nullable=True)
+
+
+class User(Base):
+    __tablename__ = "utilisateur"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), nullable=False, unique=True, index=True)
+    password_hash = Column(String(255), nullable=False)

@@ -6,22 +6,11 @@ DROP TABLE IF EXISTS budget CASCADE;
 DROP TABLE IF EXISTS categorie CASCADE;
 DROP TABLE IF EXISTS utilisateur CASCADE;
 
--- Suppression des types ENUM si ils existent
-DROP TYPE IF EXISTS type_transaction;
-
--- Création du type ENUM pour les transactions
-CREATE TYPE type_transaction AS ENUM ('REVENU', 'DEPENSE');
-
 -- Table UTILISATEUR
 CREATE TABLE utilisateur (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    mot_de_passe VARCHAR(255) NOT NULL,
-    nom VARCHAR(100) NOT NULL,
-    prenom VARCHAR(100) NOT NULL,
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    derniere_connexion TIMESTAMP,
-    CONSTRAINT email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL
 );
 
 -- Table CATEGORIE
@@ -37,11 +26,11 @@ CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
     montant DECIMAL(10, 2) NOT NULL,
     libelle VARCHAR(255) NOT NULL,
-    type type_transaction NOT NULL,
-    date DATE NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    date TIMESTAMP NOT NULL,
     date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     categorie_id INTEGER NOT NULL,
-    utilisateur_id INTEGER NOT NULL,
+    utilisateur_id INTEGER,
     CONSTRAINT fk_transactions_categorie FOREIGN KEY (categorie_id) 
         REFERENCES categorie(id) ON DELETE RESTRICT,
     CONSTRAINT fk_transactions_utilisateur FOREIGN KEY (utilisateur_id) 
@@ -56,7 +45,7 @@ CREATE TABLE budget (
     debut_periode DATE NOT NULL,
     fin_periode DATE NOT NULL,
     categorie_id INTEGER NOT NULL,
-    utilisateur_id INTEGER NOT NULL,
+    utilisateur_id INTEGER,
     CONSTRAINT fk_budget_categorie FOREIGN KEY (categorie_id) 
         REFERENCES categorie(id) ON DELETE RESTRICT,
     CONSTRAINT fk_budget_utilisateur FOREIGN KEY (utilisateur_id) 
@@ -79,8 +68,8 @@ INSERT INTO categorie (nom, description, icone) VALUES
     ('Factures', 'Électricité, internet, téléphone', '📱'),
     ('Autres', 'Dépenses diverses non catégorisées', '📦');
 
-INSERT INTO utilisateur (email, mot_de_passe, nom, prenom, date_creation) VALUES 
-    ('user@budget.com', 'passwordhash', 'One', 'User', CURRENT_TIMESTAMP);
+INSERT INTO utilisateur (username, password_hash) VALUES 
+    ('testuser', '$2b$12$5ojyQPgStRbU2gP3w7KJBevdHlsWoMCuVqSHoZqCu0DlJKJpTGlIm');
 
 -- Commentaires sur les tables et colonnes
 COMMENT ON TABLE utilisateur IS 'Utilisateurs de l''application de gestion de budget';
@@ -88,7 +77,7 @@ COMMENT ON TABLE categorie IS 'Catégories prédéfinies pour classifier les tra
 COMMENT ON TABLE transactions IS 'Enregistrement des revenus et dépenses';
 COMMENT ON TABLE budget IS 'Budgets définis par catégorie et période';
 
-COMMENT ON COLUMN utilisateur.mot_de_passe IS 'Hash du mot de passe (bcrypt, argon2, etc.)';
+COMMENT ON COLUMN utilisateur.password_hash IS 'Hash du mot de passe (bcrypt)';
 COMMENT ON COLUMN transactions.montant IS 'Montant en euros avec 2 décimales';
 COMMENT ON COLUMN budget.montant_fixe IS 'Budget alloué pour la période';
 

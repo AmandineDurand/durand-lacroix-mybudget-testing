@@ -1,16 +1,17 @@
 from fastapi import FastAPI, status, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from routers import transactions, categories, budgets
+from routers import transactions, categories, budgets, auth
 
 # Init
 app = FastAPI(
     title="Budget Personnel API",
-    description="API de gestion de budget",
+    description="API de gestion de budget avec authentification JWT",
     version="1.0.0"
 )
 
 # Inclusion des routeurs
+app.include_router(auth.router)
 app.include_router(transactions.router)
 app.include_router(categories.router)
 app.include_router(budgets.router)

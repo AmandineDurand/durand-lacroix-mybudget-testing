@@ -90,13 +90,13 @@ class TestAPI:
         
         mock_query = MagicMock()
         mock_join = MagicMock()
-        mock_filter1 = MagicMock()
-        mock_filter2 = MagicMock()
+        mock_filter = MagicMock()
         mock_order = MagicMock()
         mock_order.all.return_value = transactions
-        mock_filter2.order_by.return_value = mock_order
-        mock_filter1.filter.return_value = mock_filter2
-        mock_join.filter.return_value = mock_filter1
+        # Make filter chainable - filter() returns self for multiple filter calls
+        mock_filter.filter.return_value = mock_filter
+        mock_filter.order_by.return_value = mock_order
+        mock_join.filter.return_value = mock_filter
         mock_query.join.return_value = mock_join
         mock_db_session.query.return_value = mock_query
         
@@ -153,6 +153,8 @@ class TestAPI:
         mock_filter = MagicMock()
         mock_order = MagicMock()
         mock_order.all.return_value = [t]
+        # Make filter chainable
+        mock_filter.filter.return_value = mock_filter
         mock_filter.order_by.return_value = mock_order
         mock_join.filter.return_value = mock_filter
         mock_query.join.return_value = mock_join

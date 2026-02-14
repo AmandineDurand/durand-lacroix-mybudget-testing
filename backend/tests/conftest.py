@@ -33,6 +33,7 @@ def mock_transaction(mock_category):
     transaction.date = datetime(2026, 1, 5)
     transaction.categorie_id = 1
     transaction.categorie_obj = mock_category
+    transaction.utilisateur_id = 1  # Pour passer les validations user_id
     return transaction
 
 @pytest.fixture
@@ -44,6 +45,7 @@ def mock_budget():
     budget.montant_fixe = 100.0
     budget.debut_periode = date(2026, 1, 1)
     budget.fin_periode = date(2026, 1, 31)
+    budget.utilisateur_id = 1  # Pour passer les validations user_id
     return budget
 
 @pytest.fixture
@@ -71,6 +73,7 @@ def mock_transaction_list(mock_category):
     t1.date = datetime(2026, 1, 5)
     t1.categorie_id = 1
     t1.categorie_obj = mock_category
+    t1.utilisateur_id = 1
 
     t2 = MagicMock(spec=Transaction)
     t2.id = 2
@@ -79,6 +82,7 @@ def mock_transaction_list(mock_category):
     t2.date = datetime(2026, 1, 15)
     t2.categorie_id = 1
     t2.categorie_obj = mock_category
+    t2.utilisateur_id = 1
 
     t3 = MagicMock(spec=Transaction)
     t3.id = 3
@@ -87,6 +91,7 @@ def mock_transaction_list(mock_category):
     t3.date = datetime(2025, 12, 31) # Hors période
     t3.categorie_id = 1
     t3.categorie_obj = mock_category
+    t3.utilisateur_id = 1
     
     return [t1, t2, t3]
 
@@ -124,14 +129,26 @@ def mock_refresh(mock_category):
     return _refresh
 
 @pytest.fixture
-def client(mock_db_session):
+def mock_user():
+    """Mock d'un utilisateur authentifié pour les tests"""
+    from models.models import User
+    user = MagicMock(spec=User)
+    user.id = 1
+    user.username = "testuser"
+    user.password_hash = "hashed_password"
+    return user
+
+@pytest.fixture
+def client(mock_db_session, mock_user):
     """
     Client FastAPI qui utilise la fausse session DB via override_dependency.
     Permet de tester les routes sans lancer de vraie base.
+    Inclut aussi l'override d'authentification pour les tests existants.
     """
     from fastapi.testclient import TestClient
     from app import app
     from database import get_db
+    from auth import get_current_user_from_header
 
     def override_get_db():
         try:
@@ -139,7 +156,12 @@ def client(mock_db_session):
         finally:
             pass
 
+    def override_get_current_user():
+        """Retourne un utilisateur test authentifié sans vérifier le header"""
+        return mock_user
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user_from_header] = override_get_current_user
     with TestClient(app) as c:
         yield c
     # Nettoyage après les tests

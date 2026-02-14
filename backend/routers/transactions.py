@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 from schemas.transaction import TransactionCreate, TransactionRead, TransactionUpdate
 from scripts.saisie_transaction import TransactionService
+from auth import get_current_user_from_header
+from models.models import User
 
 router = APIRouter(
     prefix="/api/transactions",
@@ -17,10 +19,11 @@ def get_transaction_service(db: Session = Depends(get_db)) -> TransactionService
 @router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
 def create_transaction(
     transaction_data: TransactionCreate,
+    current_user: User = Depends(get_current_user_from_header),
     service: TransactionService = Depends(get_transaction_service)
 ):
     try:
-        transaction = service.create_transaction(transaction_data)
+        transaction = service.create_transaction(transaction_data, user_id=current_user.id)
         return transaction
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -33,6 +36,7 @@ def list_transactions(
     date_fin: str | None = Query(None, description="Format YYYY-MM-DD"),
     categorie: str | None = None,
     type_filtre: str | None = Query(None, description="REVENU ou DEPENSE"),
+    current_user: User = Depends(get_current_user_from_header),
     service: TransactionService = Depends(get_transaction_service)
 ):
     try:
@@ -40,7 +44,8 @@ def list_transactions(
             date_debut=date_debut, 
             date_fin=date_fin, 
             categorie_nom=categorie,
-            type_filtre=type_filtre
+            type_filtre=type_filtre,
+            user_id=current_user.id
         )
         return transactions
     except ValueError as e:
@@ -48,10 +53,12 @@ def list_transactions(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
 
+
 @router.put("/{transaction_id}", response_model=TransactionRead, status_code=status.HTTP_200_OK)
 def update_transaction(
     transaction_id: int,
     transaction_data: TransactionUpdate,
+    current_user: User = Depends(get_current_user_from_header),
     service: TransactionService = Depends(get_transaction_service)
 ):
     try:
@@ -61,7 +68,8 @@ def update_transaction(
             libelle=transaction_data.libelle,
             type=transaction_data.type,
             date=transaction_data.date,
-            categorie=transaction_data.categorie
+            categorie=transaction_data.categorie,
+            user_id=current_user.id
         )
         return transaction
     except ValueError as e:
@@ -75,6 +83,7 @@ def total_transactions(
     date_fin: str | None = Query(None, description="Format YYYY-MM-DD"),
     categorie: str | None = None,
     type_filtre: str | None = Query(None, description="REVENU ou DEPENSE"),
+    current_user: User = Depends(get_current_user_from_header),
     service: TransactionService = Depends(get_transaction_service)
 ):
     try:
@@ -82,7 +91,8 @@ def total_transactions(
             date_debut=date_debut,
             date_fin=date_fin,
             categorie_nom=categorie,
-            type_filtre=type_filtre
+            type_filtre=type_filtre,
+            user_id=current_user.id
         )
         return {"total": total}
     except ValueError as e:
@@ -93,10 +103,11 @@ def total_transactions(
 @router.delete("/{transaction_id}")
 def delete_transaction(
     transaction_id: int,
+    current_user: User = Depends(get_current_user_from_header),
     service: TransactionService = Depends(get_transaction_service)
 ):
     try:
-        total = service.delete_transaction(transaction_id=transaction_id)
+        total = service.delete_transaction(transaction_id=transaction_id, user_id=current_user.id)
         return {"total": total}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

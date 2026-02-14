@@ -13,7 +13,10 @@ class TestDeleteTransactionRouter:
         
         remaining = [mock_transaction_list[1]]
         mock_query_total = MagicMock()
-        mock_query_total.join.return_value.all.return_value = remaining
+        mock_join = MagicMock()
+        mock_join.filter.return_value = mock_join  # chainable filter
+        mock_join.all.return_value = remaining
+        mock_query_total.join.return_value = mock_join
         
         mock_db_session.query.side_effect = [mock_query_find, mock_query_total]
         

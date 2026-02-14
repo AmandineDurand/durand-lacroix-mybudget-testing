@@ -6,7 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from database import get_db
 from scripts.saisie_budget import BudgetService
 from schemas.budget import BudgetCreate, BudgetFilterParams, BudgetRead, BudgetStatus, BudgetUpdate
-from models.models import BudgetAlreadyExistsError, BudgetNotFoundError, CategorieNotFoundError
+from models.models import BudgetAlreadyExistsError, BudgetNotFoundError, CategorieNotFoundError, User
+from auth import get_current_user_from_header
 
 router = APIRouter(
     prefix="/api/budgets",
@@ -14,7 +15,11 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=BudgetRead, status_code=status.HTTP_201_CREATED)
-def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
+def create_budget(
+    budget: BudgetCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_header)
+):
 
     try :
         service = BudgetService(db)
@@ -23,7 +28,8 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
             categorie_id=budget.categorie_id,
             montant=budget.montant_fixe,
             date_debut=budget.debut_periode,
-            date_fin=budget.fin_periode
+            date_fin=budget.fin_periode,
+            user_id=current_user.id
         )
         return nouveau_budget
     except CategorieNotFoundError as e:
@@ -38,7 +44,11 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
     
 @router.get("/{budget_id}", response_model=BudgetStatus)
-def get_budget_status(budget_id: int, db: Session = Depends(get_db)):
+def get_budget_status(
+    budget_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_header)
+):
     """
     Récupère l'état d'un budget (consommé, restant) par son ID.
     """
@@ -56,17 +66,19 @@ def get_budget_status(budget_id: int, db: Session = Depends(get_db)):
 @router.get("/", response_model=list[BudgetStatus])
 def get_budgets(
     params: BudgetFilterParams = Depends(),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_header)
 ):
     """Récupère la liste des budgets enrichis (statuts calculés)."""
-    try: 
+    try:
         service = BudgetService(db)
         budgets = service.get_budgets(
             categorie_id=params.categorie_id,
             debut_periode=params.debut,
             fin_periode=params.fin,
             skip=params.skip,
-            limit=params.limit
+            limit=params.limit,
+            user_id=current_user.id
         )
         return budgets
     except CategorieNotFoundError as e:
@@ -77,7 +89,12 @@ def get_budgets(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Internal Server Error")
     
 @router.put("/{budget_id}", response_model=BudgetRead)
-def update_budget(budget_id: int, budget: BudgetUpdate, db: Session = Depends(get_db)):
+def update_budget(
+    budget_id: int,
+    budget: BudgetUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_header)
+):
     """
     Met à jour un budget existant (Catégorie, Montant ou Période).
     """
@@ -88,7 +105,8 @@ def update_budget(budget_id: int, budget: BudgetUpdate, db: Session = Depends(ge
             categorie_id=budget.categorie_id,
             montant=budget.montant_fixe,
             date_debut=budget.debut_periode,
-            date_fin=budget.fin_periode
+            date_fin=budget.fin_periode,
+            user_id=current_user.id
         )
         return updated_budget
 

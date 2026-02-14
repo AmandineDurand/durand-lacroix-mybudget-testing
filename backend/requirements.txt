@@ -4,7 +4,8 @@ sqlalchemy
 psycopg2-binary
 pydantic
 python-dotenv
-
+PyJWT
+bcrypt
 pytest
 pytest-cov
 pytest-env
