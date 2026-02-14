@@ -57,16 +57,17 @@ CREATE TABLE budget (
 
 -- Insertion des catégories prédéfinies
 INSERT INTO categorie (nom, description, icone) VALUES
-    ('Alimentation', 'Courses, restaurants, cafés', '🍔'),
-    ('Logement', 'Loyer, charges, assurance habitation', '🏠'),
-    ('Transports', 'Essence, transports en commun, parking', '🚗'),
-    ('Loisirs', 'Sorties, divertissements, hobbies', '🎮'),
-    ('Santé', 'Médecin, pharmacie, mutuelle', '⚕️'),
-    ('Vêtements', 'Habits, chaussures, accessoires', '👕'),
-    ('Éducation', 'Formations, livres, cours', '📚'),
-    ('Épargne', 'Placements, économies', '💰'),
-    ('Factures', 'Électricité, internet, téléphone', '📱'),
-    ('Autres', 'Dépenses diverses non catégorisées', '📦');
+    ('Alimentation', 'Courses, restaurants, cafés', '🍽︎'),
+    ('Logement', 'Loyer, charges, assurance habitation', '🏘︎'),
+    ('Transports', 'Essence, transports en commun, parking', '🚌︎'),
+    ('Loisirs', 'Sorties, divertissements, hobbies', '🎯︎'),
+    ('Santé', 'Médecin, pharmacie, mutuelle', '⚕︎'),
+    ('Vêtements', 'Habits, chaussures, accessoires', '👔︎'),
+    ('Éducation', 'Formations, livres, cours', '📖︎'),
+    ('Épargne', 'Placements, économies', '🏦︎'),
+    ('Factures', 'Électricité, internet, téléphone', '🧾︎'),
+    ('Revenus', 'Salaires, primes, revenus passifs', '💰︎'),
+    ('Autres', 'Dépenses diverses non catégorisées', '⋯');
 
 INSERT INTO utilisateur (username, password_hash) VALUES 
     ('testuser', '$2b$12$5ojyQPgStRbU2gP3w7KJBevdHlsWoMCuVqSHoZqCu0DlJKJpTGlIm');
