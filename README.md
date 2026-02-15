@@ -35,7 +35,8 @@ POSTGRES_PORT=5432
 SECRET_KEY=votre_cle_secrete_jwt_ici
 ```
 
-2.2 Pour créer la clé secrète, exécuter la commande suivante dans un terminal :
+2.2 Pour créer une clé secrète, exécuter la commande suivante dans un terminal :
+
 ```python
 python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
@@ -195,42 +196,50 @@ pytest tests/unit/
 Le projet suit une approche Behavior-Driven Development (BDD) avec des user stories détaillées.
 
 ### User Story 1 : Ajouter une transaction
+
 **Fichier** : [user_stories/user_story_01.md](user_stories/user_story_01.md)
 
 **Objectif** : Permettre à un utilisateur d'enregistrer une nouvelle transaction (revenu ou dépense).
 
 **Critères d'acceptation** :
+
 - Montant positif obligatoire
 - Type REVENU ou DEPENSE
 - Catégorie et date obligatoires
 - Retour HTTP 201 en cas de succès
 
 ### User Story 2 : Liste des transactions
+
 **Fichier** : [user_stories/user_story_02.md](user_stories/user_story_02.md)
 
 **Objectif** : Consulter l'historique complet de ses transactions.
 
 **Critères d'acceptation** :
+
 - Retourne toutes les transactions de l'utilisateur connecté
 - Format JSON avec tous les attributs
 - Retourne un tableau vide si aucune transaction
 
 ### User Story 3 : Filtrage par période
+
 **Fichier** : [user_stories/user_story_03.md](user_stories/user_story_03.md)
 
 **Objectif** : Filtrer les transactions sur une période donnée.
 
 **Critères d'acceptation** :
+
 - Filtrage par date de début et/ou date de fin
 - Dates au format ISO 8601
 - Validation des dates
 
 ### User Story 4 : Filtrage par catégorie
+
 **Fichier** : [user_stories/user_story_04.md](user_stories/user_story_04.md)
 
 **Objectif** : Consulter les transactions d'une catégorie spécifique.
 
 **Critères d'acceptation** :
+
 - Recherche insensible à la casse
 - Combinable avec le filtre de période
 - Retourne un tableau vide si aucune correspondance

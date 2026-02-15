@@ -30,6 +30,29 @@ def create_transaction(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
 
+@router.get("/total")
+def total_transactions(
+    date_debut: str | None = Query(None, description="Format YYYY-MM-DD"),
+    date_fin: str | None = Query(None, description="Format YYYY-MM-DD"),
+    categorie: str | None = None,
+    type_filtre: str | None = Query(None, description="REVENU ou DEPENSE"),
+    current_user: User = Depends(get_current_user_from_header),
+    service: TransactionService = Depends(get_transaction_service)
+):
+    try:
+        total = service.get_total_transactions(
+            date_debut=date_debut,
+            date_fin=date_fin,
+            categorie_nom=categorie,
+            type_filtre=type_filtre,
+            user_id=current_user.id
+        )
+        return {"total": total}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+
 @router.get("/", response_model=list[TransactionRead])
 def list_transactions(
     date_debut: str | None = Query(None, description="Format YYYY-MM-DD"),
@@ -41,8 +64,8 @@ def list_transactions(
 ):
     try:
         transactions = service.get_transactions(
-            date_debut=date_debut, 
-            date_fin=date_fin, 
+            date_debut=date_debut,
+            date_fin=date_fin,
             categorie_nom=categorie,
             type_filtre=type_filtre,
             user_id=current_user.id
@@ -76,30 +99,7 @@ def update_transaction(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
-    
-@router.get("/total")
-def total_transactions(
-    date_debut: str | None = Query(None, description="Format YYYY-MM-DD"),
-    date_fin: str | None = Query(None, description="Format YYYY-MM-DD"),
-    categorie: str | None = None,
-    type_filtre: str | None = Query(None, description="REVENU ou DEPENSE"),
-    current_user: User = Depends(get_current_user_from_header),
-    service: TransactionService = Depends(get_transaction_service)
-):
-    try:
-        total = service.get_total_transactions(
-            date_debut=date_debut,
-            date_fin=date_fin,
-            categorie_nom=categorie,
-            type_filtre=type_filtre,
-            user_id=current_user.id
-        )
-        return {"total": total}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
-    
+
 @router.delete("/{transaction_id}")
 def delete_transaction(
     transaction_id: int,
