@@ -43,6 +43,7 @@ export default function Login() {
       const response = await loginApi({
         username: form.username,
         password: form.password,
+        rememberMe: form.rememberMe,
       });
 
       login(
