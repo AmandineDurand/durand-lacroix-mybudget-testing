@@ -4,6 +4,14 @@ import { getCategories, createTransaction } from "../api/client";
 import { useToast } from "../components/Toast";
 import CategoryIcon from "../components/CategoryIcons";
 
+const limitToTwoDecimals = (value) => {
+  if (value === "") return "";
+  const parts = value.toString().split(".");
+  if (parts.length > 2) return "";
+  if (parts[1] && parts[1].length > 2) return parseFloat(value).toFixed(2);
+  return value;
+};
+
 export default function AddTransaction() {
   const toast = useToast();
   const navigate = useNavigate();
@@ -153,7 +161,9 @@ export default function AddTransaction() {
                   step="0.01"
                   autoFocus
                   value={form.montant}
-                  onChange={(e) => set("montant", e.target.value)}
+                  onChange={(e) =>
+                    set("montant", limitToTwoDecimals(e.target.value))
+                  }
                   className={`w-full bg-white/80 border-b-4 border-gray-300 focus:border-indigo-200 text-right font-data font-bold text-6xl p-2 outline-none transition-colors placeholder:text-indigo-light placeholder:font-light text-shadow-sm text-indigo-light focus:opacity-100 opacity-60`}
                 />
                 <span className="absolute top-1/2 -translate-y-1/2 left-2 font-display font-extrabold text-4xl text-indigo-light opacity-50">

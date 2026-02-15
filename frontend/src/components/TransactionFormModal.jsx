@@ -3,6 +3,14 @@ import { getCategories, updateTransaction } from "../api/client";
 import { useToast } from "./Toast";
 import Modal from "./Modal";
 
+const limitToTwoDecimals = (value) => {
+  if (value === "") return "";
+  const parts = value.toString().split(".");
+  if (parts.length > 2) return "";
+  if (parts[1] && parts[1].length > 2) return parseFloat(value).toFixed(2);
+  return value;
+};
+
 export default function TransactionFormModal({
   open,
   onClose,
@@ -133,7 +141,9 @@ export default function TransactionFormModal({
             step="0.01"
             min="0"
             value={form.montant}
-            onChange={(e) => handleChange("montant", e.target.value)}
+            onChange={(e) =>
+              handleChange("montant", limitToTwoDecimals(e.target.value))
+            }
             className="w-full bg-indigo/5 border-2 border-transparent focus:border-indigo-light focus:bg-white rounded-lg px-4 py-2.5 font-data font-bold text-indigo-light/60 focus:text-indigo-light placeholder-indigo-light/40 outline-none transition-all"
             placeholder="0.00"
           />
