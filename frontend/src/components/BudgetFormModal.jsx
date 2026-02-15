@@ -3,6 +3,14 @@ import Modal from "./Modal";
 import { getCategories, createBudget, updateBudget } from "../api/client";
 import { useToast } from "./Toast";
 
+const limitToTwoDecimals = (value) => {
+  if (value === "") return "";
+  const parts = value.toString().split(".");
+  if (parts.length > 2) return form.montant_fixe;
+  if (parts[1] && parts[1].length > 2) return parseFloat(value).toFixed(2);
+  return value;
+};
+
 export default function BudgetFormModal({ open, onClose, onSuccess, budget }) {
   const toast = useToast();
   const isEdit = !!budget;
@@ -128,9 +136,10 @@ export default function BudgetFormModal({ open, onClose, onSuccess, budget }) {
             min="0.01"
             step="0.01"
             value={form.montant_fixe}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, montant_fixe: e.target.value }))
-            }
+            onChange={(e) => {
+              const limited = limitToTwoDecimals(e.target.value);
+              setForm((f) => ({ ...f, montant_fixe: limited }));
+            }}
             className="w-full bg-indigo/5 border-2 border-transparent focus:border-indigo-light focus:bg-white rounded-lg px-4 py-2.5 font-data font-bold text-indigo-light/60 focus:text-indigo-light placeholder-indigo-light/40 outline-none transition-all"
             placeholder="0.00"
           />
