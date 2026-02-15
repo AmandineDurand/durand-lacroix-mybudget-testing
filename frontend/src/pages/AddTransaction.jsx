@@ -109,7 +109,7 @@ export default function AddTransaction() {
       };
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto min-h-screen p-4 md:p-8 relative">
+    <div className="w-full max-w-350 mx-auto min-h-screen p-4 md:p-8 relative">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 w-full relative z-10">
         <div className="flex flex-col gap-6">
           <h1 className="font-display font-extrabold uppercase text-2xl md:text-3xl text-indigo tracking-widest text-shadow-sm">

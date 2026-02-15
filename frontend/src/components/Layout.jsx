@@ -3,9 +3,11 @@ import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog";
 import BackgroundShapes from "./BackgroundShapes";
+import { useToast } from "./Toast";
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const toast = useToast();
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -13,6 +15,7 @@ export default function Layout({ children }) {
   const handleLogout = () => {
     logout();
     navigate("/login");
+    toast("Déconnexion réussie", "success");
   };
 
   const pageTitles = {
@@ -42,7 +45,7 @@ export default function Layout({ children }) {
       <BackgroundShapes />
 
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b-2 border-indigo-light shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-350 mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               to="/"

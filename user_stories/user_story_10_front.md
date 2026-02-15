@@ -18,12 +18,13 @@
 **Critères de Validation :**
 
 - [ ] **Authentification requise :** L'utilisateur doit être connecté pour modifier une transaction.
-- [ ] **Protection des données :** L'utilisateur ne peut modifier **que ses propres transactions**. Si la transaction appartient à un autre utilisateur, l'API renvoie une erreur 400 avec le message "Vous ne pouvez modifier que vos propres transactions".
+- [ ] **Protection des données :** L'utilisateur ne peut modifier **que ses propres transactions**. Si la transaction appartient à un autre utilisateur, l'API renvoie une erreur 403 avec le message "Vous ne pouvez modifier que vos propres transactions".
 - [ ] Pré-remplissage correct de tous les champs avec les valeurs actuelles de la transaction.
 - [ ] Les mêmes validations que la création s'appliquent : montant > 0, catégorie valide, type parmi REVENU/DEPENSE.
 - [ ] Le bouton "Sauvegarder" affiche un spinner et est désactivé pendant l'appel API pour éviter les doubles soumissions.
 - [ ] Gestion des erreurs 404 : Si la transaction a été supprimée entre-temps, afficher un message d'erreur et fermer la modale.
-- [ ] Gestion des erreurs 400 : Afficher les messages d'erreur de validation (ex: "La catégorie n'existe pas" ou "Vous ne pouvez modifier que vos propres transactions") sous le champ concerné ou dans une alerte.
+- [ ] Gestion des erreurs 400 : Afficher les messages d'erreur de validation (ex: "La catégorie n'existe pas") sous le champ concerné ou dans une alerte.
+- [ ] Gestion des erreurs 403 : Afficher le message "Vous ne pouvez modifier que vos propres transactions" si l'utilisateur tente de modifier une transaction qui ne lui appartient pas.
 - [ ] En cas d'erreur 401 (session expirée), redirection automatique vers `/login` via l'intercepteur global.
 - [ ] Mise à jour optimiste (Optimistic UI) ou rechargement automatique de la liste après succès pour refléter les changements.
 - [ ] Le total des transactions (si affiché) doit être recalculé automatiquement après modification.

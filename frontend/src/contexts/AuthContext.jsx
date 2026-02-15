@@ -17,7 +17,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const storedToken =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
+      localStorage.getItem("auth_token") ||
+      sessionStorage.getItem("auth_token");
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
 
@@ -30,16 +31,16 @@ export function AuthProvider({ children }) {
 
   const login = (userData, accessToken, rememberMe = false) => {
     const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem("token", accessToken);
+    storage.setItem("auth_token", accessToken);
     storage.setItem("user", JSON.stringify(userData));
     setToken(accessToken);
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("auth_token");
     localStorage.removeItem("user");
-    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("auth_token");
     sessionStorage.removeItem("user");
     setToken(null);
     setUser(null);

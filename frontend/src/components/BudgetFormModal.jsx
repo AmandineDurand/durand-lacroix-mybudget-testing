@@ -54,6 +54,10 @@ export default function BudgetFormModal({ open, onClose, onSuccess, budget }) {
       setError("La date de fin doit être postérieure à la date de début");
       return;
     }
+    if (!form.montant_fixe || Number(form.montant_fixe) <= 0) {
+      setError("Le montant doit être positif");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -93,7 +97,7 @@ export default function BudgetFormModal({ open, onClose, onSuccess, budget }) {
       onClose={onClose}
       title={isEdit ? "Modifier le budget" : "Nouveau budget"}
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form noValidate onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block font-display font-bold text-xs uppercase text-indigo/40 mb-2 tracking-wide">
             Catégorie

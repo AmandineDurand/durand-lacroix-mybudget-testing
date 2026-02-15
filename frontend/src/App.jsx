@@ -16,7 +16,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <div className="min-h-screen bg-bg-concrete w-full max-w-[1400px] mx-auto">
+          <div className="min-h-screen bg-bg-concrete w-full max-w-350 mx-auto">
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />

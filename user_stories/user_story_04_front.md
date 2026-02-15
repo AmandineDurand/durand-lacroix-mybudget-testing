@@ -26,6 +26,3 @@
 - [ ] L'utilisateur est immédiatement redirigé vers `/login` après déconnexion.
 - [ ] Une notification toast verte affiche "Déconnexion réussie" après redirection.
 - [ ] Si l'utilisateur tente d'accéder à une page protégée après déconnexion (ex: via le bouton "Précédent" du navigateur), il est redirigé vers `/login` (Route Guard actif).
-- [ ] Option avancée (bonus) : Déconnexion automatique après 30 minutes d'inactivité (détection d'événements clavier/souris).
-- [ ] Option avancée (bonus) : Affichage d'un timer de déconnexion automatique dans les 2 dernières minutes avant expiration du token avec possibilité de renouveler la session.
-- [ ] Sécurité : Aucun appel API n'est fait côté serveur pour la déconnexion (le token est géré uniquement côté client, il expire automatiquement côté serveur après 30 minutes).

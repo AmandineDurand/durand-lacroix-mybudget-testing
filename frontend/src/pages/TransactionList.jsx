@@ -43,6 +43,7 @@ export default function TransactionList() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [flippedButtons, setFlippedButtons] = useState({});
 
   const debounceRef = useRef(null);
@@ -107,11 +108,16 @@ export default function TransactionList() {
 
   const handleDeleteConfirm = async () => {
     try {
+      setIsDeleting(true);
       await deleteTransaction(transactionToDelete.id);
       toast("Transaction supprimée avec succès");
       fetchData(filters);
     } catch (err) {
       toast("Erreur lors de la suppression");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setTransactionToDelete(null);
     }
   };
 
@@ -135,7 +141,7 @@ export default function TransactionList() {
   }, [filteredTransactions]);
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto min-h-screen p-4 md:p-8 relative">
+    <div className="w-full max-w-350 mx-auto min-h-screen p-4 md:p-8 relative">
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12 relative z-10">
         <div>
           <div>
@@ -287,7 +293,7 @@ export default function TransactionList() {
       </div>
 
       <div className="relative">
-        <div className="absolute left-[27px] md:left-[35px] top-0 bottom-0 w-0.5 bg-indigo-light/20 rounded-full hidden md:block"></div>
+        <div className="absolute left-6.75 md:left-8.75 top-0 bottom-0 w-0.5 bg-indigo-light/20 rounded-full hidden md:block"></div>
 
         {loading ? (
           <div className="space-y-8 pl-0 md:pl-24">
@@ -337,7 +343,7 @@ export default function TransactionList() {
                   `}
                   ></div>
 
-                  <div className="absolute left-[35px] top-1/2 w-[60px] h-0.5 bg-indigo-light/20 hidden md:block group-hover:bg-indigo-light/50 transition-colors"></div>
+                  <div className="absolute left-8.75 top-1/2 w-15 h-0.5 bg-indigo-light/20 hidden md:block group-hover:bg-indigo-light/50 transition-colors"></div>
 
                   <div
                     className={`
@@ -352,7 +358,7 @@ export default function TransactionList() {
                       className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-md ${theme.bgIcon}`}
                     ></div>
 
-                    <div className="flex flex-row md:flex-col items-center justify-center gap-1 md:gap-0 min-w-[70px] pl-4">
+                    <div className="flex flex-row md:flex-col items-center justify-center gap-1 md:gap-0 min-w-17.5 pl-4">
                       <span className="font-display font-black text-2xl text-indigo leading-none">
                         {String(dateObj.getDate()).padStart(2, "0")}
                       </span>
@@ -389,7 +395,7 @@ export default function TransactionList() {
                     </div>
 
                     <div
-                      className={`text-right pl-4 border-l-0 md:border-l-2 border-dashed border-indigo-light/90 ml-auto md:ml-0 min-w-[140px]`}
+                      className={`text-right pl-4 border-l-0 md:border-l-2 border-dashed border-indigo-light/90 ml-auto md:ml-0 min-w-35`}
                     >
                       <div
                         className={`font-data font-bold text-3xl ${theme.main} text-shadow-sm`}
@@ -403,7 +409,7 @@ export default function TransactionList() {
                     </div>
 
                     <div
-                      className="ml-4 relative w-[88px] h-10"
+                      className="ml-4 relative w-22 h-10"
                       data-action-buttons
                     >
                       <div
@@ -527,6 +533,8 @@ export default function TransactionList() {
         message={`Voulez-vous vraiment supprimer "${transactionToDelete?.libelle}" (${euro(transactionToDelete?.montant || 0)}) ?`}
         confirmText="Supprimer"
         cancelText="Annuler"
+        loading={isDeleting}
+        closeOnConfirm={false}
         type="danger"
       />
     </div>

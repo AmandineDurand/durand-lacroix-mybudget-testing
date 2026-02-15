@@ -3,7 +3,7 @@ import axios from "axios";
 const api = axios.create({ baseURL: "/api" });
 
 const getToken = () =>
-  localStorage.getItem("token") || sessionStorage.getItem("token");
+  localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
 
 api.interceptors.request.use(
   (config) => {
@@ -23,9 +23,9 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       !window.location.pathname.includes("/login")
     ) {
-      localStorage.removeItem("token");
+      localStorage.removeItem("auth_token");
       localStorage.removeItem("user");
-      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("auth_token");
       sessionStorage.removeItem("user");
       window.location.href = "/login";
     }

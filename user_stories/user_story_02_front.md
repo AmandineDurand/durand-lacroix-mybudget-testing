@@ -25,5 +25,4 @@
 - [ ] Le token JWT (`access_token`) est stocké en toute sécurité dans le storage du navigateur avec la clé `auth_token`.
 - [ ] Les informations utilisateur (`user_id`, `username`) sont également stockées pour affichage dans l'UI (ex: header).
 - [ ] Un lien "Créer un compte" redirige vers la page d'inscription (US 1).
-- [ ] Un lien "Mot de passe oublié ?" est affiché (fonctionnalité future, lien désactivé pour le moment).
 - [ ] Après connexion réussie, toutes les requêtes API suivantes incluent automatiquement le header `Authorization: Bearer <token>`.

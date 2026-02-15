@@ -53,7 +53,7 @@ export default function BudgetDetail() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-[1400px] mx-auto min-h-screen p-4 md:p-8 flex flex-col justify-center">
+      <div className="w-full max-w-350 mx-auto min-h-screen p-4 md:p-8 flex flex-col justify-center">
         <Skeleton count={4} />
       </div>
     );
@@ -65,7 +65,7 @@ export default function BudgetDetail() {
   const isOver = budget.est_depasse;
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto min-h-screen p-4 md:p-8 flex flex-col gap-8 relative">
+    <div className="w-full max-w-350 mx-auto min-h-screen p-4 md:p-8 flex flex-col gap-8 relative">
       <div className="flex justify-between items-center z-10">
         <div className="bg-indigo text-white px-4 py-1 rounded-full font-display font-bold uppercase text-xs tracking-[0.2em]">
           Fiche Détail
@@ -117,7 +117,7 @@ export default function BudgetDetail() {
             </span>
           </div>
 
-          <div className="h-[60px] bg-gray-100 border-2 border-indigo-light rounded-4xl p-1.5 relative overflow-hidden">
+          <div className="h-15 bg-gray-100 border-2 border-indigo-light rounded-4xl p-1.5 relative overflow-hidden">
             <div
               className="h-full rounded-[1.2rem] transition-all duration-1000 ease-out"
               style={{ width: `${pct}%`, backgroundColor: progressBg(pct) }}

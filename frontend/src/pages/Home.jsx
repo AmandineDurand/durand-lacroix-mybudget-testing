@@ -73,7 +73,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto min-h-screen p-4 md:p-8 relative">
+    <div className="w-full max-w-350 mx-auto min-h-screen p-4 md:p-8 relative">
       <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full relative z-10">
         <section className="lg:col-span-8 flex flex-col">
           <div className="relative bg-white/80 backdrop-blur-lg rounded-2xl p-8 md:p-12 border-2 border-indigo-light mb-8 group hover:-translate-y-1 hover:shadow-[4px_4px_0px_var(--color-indigo-light)] transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)]">
@@ -154,7 +154,7 @@ export default function Home() {
                               className="w-5 h-5 text-indigo"
                             />
                           </div>
-                          <span className="font-display font-extrabold uppercase text-indigo truncate max-w-[120px]">
+                          <span className="font-display font-extrabold uppercase text-indigo truncate max-w-30">
                             {cat?.nom || `Budget #${b.id}`}
                           </span>
                         </div>
@@ -216,7 +216,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="flex flex-col gap-3 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+            <div className="flex flex-col gap-3 overflow-y-auto max-h-100 pr-2 custom-scrollbar">
               {pastTransactions.length === 0 ? (
                 <p className="text-center font-bold text-indigo/30 py-4">
                   R.A.S.

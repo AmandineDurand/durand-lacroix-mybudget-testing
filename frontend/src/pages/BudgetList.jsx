@@ -90,7 +90,7 @@ export default function BudgetList() {
   };
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto min-h-screen p-4 md:p-8 relative">
+    <div className="w-full max-w-350 mx-auto min-h-screen p-4 md:p-8 relative">
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
         <div>
           <div>
@@ -123,13 +123,13 @@ export default function BudgetList() {
       </div>
 
       <div className="mb-10 p-4 bg-white/80 backdrop-blur-lg border-2 border-indigo-light rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] flex flex-col md:flex-row gap-4 items-center transition-all duration-300 hover:shadow-[4px_4px_0px_var(--color-indigo-light)]">
-        <div className="relative w-full md:w-auto md:min-w-[150px]">
+        <div className="relative w-full md:w-auto md:min-w-37.5">
           <input
             type="text"
             placeholder="Rechercher..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-[150px] bg-indigo/5 border-2 border-transparent focus:border-indigo-light focus:bg-white rounded-lg px-4 py-2 font-display font-bold text-indigo placeholder-indigo/40 outline-none transition-all"
+            className="w-full md:w-37.5 bg-indigo/5 border-2 border-transparent focus:border-indigo-light focus:bg-white rounded-lg px-4 py-2 font-display font-bold text-indigo placeholder-indigo/40 outline-none transition-all"
           />
         </div>
 
@@ -275,7 +275,7 @@ export default function BudgetList() {
                       />
                     </div>
                     <div className="flex flex-col">
-                      <h3 className="font-display font-extrabold uppercase text-xl text-indigo leading-tight truncate max-w-[140px]">
+                      <h3 className="font-display font-extrabold uppercase text-xl text-indigo leading-tight truncate max-w-35">
                         {cat?.nom || "Budget"}
                       </h3>
                       <span className="font-data text-[10px] font-bold text-indigo/40 uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded-md self-start mt-1">
