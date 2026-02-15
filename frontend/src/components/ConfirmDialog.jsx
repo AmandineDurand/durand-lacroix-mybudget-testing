@@ -7,6 +7,8 @@ export default function ConfirmDialog({
   confirmText = "Confirmer",
   cancelText = "Annuler",
   type = "danger",
+  loading = false,
+  closeOnConfirm = true,
 }) {
   if (!open) return null;
 
@@ -44,6 +46,7 @@ export default function ConfirmDialog({
         <div className="flex gap-3">
           <button
             onClick={onClose}
+            disabled={loading}
             className="flex-1 bg-white text-indigo border-2 border-indigo-light rounded-xl py-3 font-display font-bold uppercase shadow-[2px_2px_0px_var(--color-indigo-lighter)] hover:shadow-[3px_3px_0px_var(--color-indigo-light)] active:shadow-[1px_1px_0px_var(--color-indigo-lighter)] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-lighter"
           >
             {cancelText}
@@ -51,11 +54,20 @@ export default function ConfirmDialog({
           <button
             onClick={() => {
               onConfirm();
-              onClose();
+              if (closeOnConfirm) {
+                onClose();
+              }
             }}
-            className={`flex-1 ${style.bg} text-white border-2 ${style.border} rounded-xl py-3 font-display font-bold uppercase shadow-[2px_2px_0px_var(--color-indigo-light)] hover:shadow-[4px_4px_0px_var(--color-indigo-light)] active:shadow-[1px_1px_0px_var(--color-indigo-light)] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-lighter`}
+            disabled={loading}
+            aria-busy={loading}
+            className={`flex-1 ${style.bg} text-white border-2 ${style.border} rounded-xl py-3 font-display font-bold uppercase shadow-[2px_2px_0px_var(--color-indigo-light)] hover:shadow-[4px_4px_0px_var(--color-indigo-light)] active:shadow-[1px_1px_0px_var(--color-indigo-light)] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-lighter disabled:opacity-70 disabled:cursor-not-allowed`}
           >
-            {confirmText}
+            <span className="inline-flex items-center justify-center gap-2">
+              {loading && (
+                <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+              )}
+              {confirmText}
+            </span>
           </button>
         </div>
       </div>
