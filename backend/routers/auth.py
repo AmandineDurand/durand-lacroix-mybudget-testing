@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, field_validator
+from datetime import timedelta
 from sqlalchemy.orm import Session
 from database import get_db
 from auth import (
@@ -33,6 +34,7 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+    rememberMe: bool = False
 
 
 class AuthResponse(BaseModel):
@@ -92,7 +94,8 @@ def login(
     """
     try:
         user = authenticate_user(request.username, request.password, db)
-        access_token = create_access_token(user.id, user.username)
+        expires_delta = timedelta(days=365) if getattr(request, "rememberMe", False) else None
+        access_token = create_access_token(user.id, user.username, expires_delta=expires_delta)
         
         return AuthResponse(
             user_id=user.id,
